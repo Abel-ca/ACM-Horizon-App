@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #06070f;
+    color: #f0f2ff;
+    font-family: 'Syne', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0d0e1e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2d3068;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f0b429;
+  }
+}
+
+@layer components {
+  /* Grid background pattern */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(45, 48, 104, 0.25) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45, 48, 104, 0.25) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* Scanline sweep effect */
+  .scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(to right, transparent, rgba(240, 180, 41, 0.4), transparent);
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.6;
+  }
+
+  /* Agent output streaming text */
+  .stream-text {
+    font-family: 'IBM Plex Mono', Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #8b90c0;
+  }
+
+  /* Blinking cursor for streaming */
+  .cursor-stream::after {
+    content: '▋';
+    color: #f0b429;
+    animation: blink 0.9s step-end infinite;
+    font-size: 0.9em;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  /* Approve button */
+  .btn-approve {
+    @apply flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #10b981;
+  }
+  .btn-approve:hover {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.7);
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Reject/regenerate button */
+  .btn-regen {
+    @apply flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200;
+    background: transparent;
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    color: rgba(244, 63, 94, 0.6);
+  }
+  .btn-regen:hover {
+    background: rgba(244, 63, 94, 0.08);
+    border-color: rgba(244, 63, 94, 0.45);
+    color: #f43f5e;
+  }
+
+  /* Primary action button */
+  .btn-primary {
+    @apply flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all duration-200;
+    background: #f0b429;
+    color: #06070f;
+  }
+  .btn-primary:hover {
+    background: #f5c842;
+    box-shadow: 0 0 28px rgba(240, 180, 41, 0.35);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Agent card base */
+  .agent-card {
+    @apply relative rounded-xl overflow-hidden transition-all duration-500;
+    background: #0d0e1e;
+    border: 1px solid #1a1c38;
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Ghost tag badge */
+  .role-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-[0.2em];
+  }
+}
+
+@layer utilities {
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #f0b429, #f5c842, #d4950a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-gold {
+    text-shadow: 0 0 20px rgba(240, 180, 41, 0.5);
+  }
+}
