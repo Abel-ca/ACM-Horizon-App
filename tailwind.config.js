@@ -4,50 +4,26 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'Menlo', 'Consolas', 'monospace'],
       },
       colors: {
-        /* Backgrounds */
-        void:     '#080a0f',
-        sidebar:  '#0a0d12',
-        deep:     '#0e1117',
-        surface:  '#13171f',
-        elevated: '#1a2030',
-
-        /* Borders */
-        'border-dim':    '#1e2530',
-        'border-bright': '#2d3a4a',
-
-        /* Agent accent colors */
-        amber:   '#f59e0b',
+        void:    '#080a0f',
+        surface: '#0e1117',
+        panel:   '#111520',
+        border:  '#1e2530',
+        /* Agent accents */
+        indigo:  '#6366f1',
         cyan:    '#06b6d4',
-        violet:  '#a855f7',
-        rose:    '#f43f5e',
+        violet:  '#8b5cf6',
+        pink:    '#ec4899',
         emerald: '#10b981',
-        gold:    '#f0b429',
-
+        amber:   '#f59e0b',
         /* Text */
         ink: {
           bright: '#f0f4ff',
           mid:    '#7a8299',
           dim:    '#3a4255',
-        },
-      },
-      animation: {
-        'fade-in':    'fadeIn 0.4s ease forwards',
-        'slide-up':   'slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        'spin-slow':  'spin 3s linear infinite',
-        'pulse-slow': 'pulse 3s ease-in-out infinite',
-      },
-      keyframes: {
-        fadeIn: {
-          from: { opacity: '0' },
-          to:   { opacity: '1' },
-        },
-        slideUp: {
-          from: { opacity: '0', transform: 'translateY(20px)' },
-          to:   { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },

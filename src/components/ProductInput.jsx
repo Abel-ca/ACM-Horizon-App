@@ -7,109 +7,72 @@ const PLACEHOLDERS = [
   'Lámpara LED de ambiente',
   'Cepillo facial sónico',
   'Pulsera de amatista premium',
-  'Mini aspiradora inalámbrica',
   'Colágeno marino hidrolizado',
   'Cargador solar portátil 20W',
+  'Mini aspiradora inalámbrica',
 ]
 
-const EXAMPLES = [
-  'Masajeador cervical',
-  'Fajas reductoras',
-  'Cepillo facial sónico',
-  'Lámpara LED',
-]
+const EXAMPLES = ['Masajeador cervical', 'Fajas reductoras', 'Cepillo sónico', 'Lámpara LED']
 
-/* ── Typing placeholder hook ───────────────────────────────── */
-function useTypingPlaceholder(phrases, { typeSpeed = 58, deleteSpeed = 32, pauseMs = 1900 } = {}) {
-  const [display, setDisplay] = useState('')
-  const phraseIdx = useRef(0)
-  const charIdx   = useRef(0)
-  const deleting  = useRef(false)
-  const timer     = useRef(null)
-
+/* ── Typing placeholder ──────────────────────────────── */
+function useTypingPlaceholder(phrases) {
+  const [text, setText] = useState('')
+  const idx = useRef(0); const ci = useRef(0); const del = useRef(false); const t = useRef(null)
   useEffect(() => {
-    function tick() {
-      const phrase = phrases[phraseIdx.current]
-      if (!deleting.current) {
-        charIdx.current += 1
-        setDisplay(phrase.slice(0, charIdx.current))
-        if (charIdx.current === phrase.length) {
-          deleting.current = true
-          timer.current = setTimeout(tick, pauseMs)
-          return
-        }
-        timer.current = setTimeout(tick, typeSpeed)
+    const tick = () => {
+      const p = phrases[idx.current]
+      if (!del.current) {
+        ci.current += 1; setText(p.slice(0, ci.current))
+        if (ci.current === p.length) { del.current = true; t.current = setTimeout(tick, 1800); return }
+        t.current = setTimeout(tick, 60)
       } else {
-        charIdx.current -= 1
-        setDisplay(phrase.slice(0, charIdx.current))
-        if (charIdx.current === 0) {
-          deleting.current = false
-          phraseIdx.current = (phraseIdx.current + 1) % phrases.length
-          timer.current = setTimeout(tick, 280)
-          return
+        ci.current -= 1; setText(p.slice(0, ci.current))
+        if (ci.current === 0) {
+          del.current = false; idx.current = (idx.current + 1) % phrases.length
+          t.current = setTimeout(tick, 280); return
         }
-        timer.current = setTimeout(tick, deleteSpeed)
+        t.current = setTimeout(tick, 35)
       }
     }
-    timer.current = setTimeout(tick, 900)
-    return () => clearTimeout(timer.current)
+    t.current = setTimeout(tick, 900)
+    return () => clearTimeout(t.current)
   }, []) // eslint-disable-line
-
-  return display
+  return text
 }
 
-/* ── Component ─────────────────────────────────────────────── */
+/* ── Component ───────────────────────────────────────── */
 export default function ProductInput({ product, setProduct, onStart, disabled }) {
   const [focused, setFocused] = useState(false)
-  const placeholder = useTypingPlaceholder(PLACEHOLDERS)
+  const ph = useTypingPlaceholder(PLACEHOLDERS)
   const canLaunch = product.trim().length > 0 && !disabled
 
   return (
     <div style={{ opacity: disabled ? 0.35 : 1, pointerEvents: disabled ? 'none' : 'auto', transition: 'opacity 0.4s' }}>
 
-      {/* Eyebrow */}
-      <p className="hero-d1 text-[9px] font-black uppercase tracking-[0.38em] mb-5"
-         style={{ color: 'rgba(245,158,11,0.55)' }}>
-        — Nueva campaña
+      <p className="hero-d1 text-[9px] font-black uppercase tracking-[0.4em] mb-5"
+         style={{ color: 'rgba(99,102,241,0.6)' }}>
+        — Centro de Comando
       </p>
 
-      {/* Hero title with aurora effect */}
-      <div className="hero-d2 relative mb-3" style={{ display: 'inline-block' }}>
-        {/* Aurora layer — behind the title */}
-        <div
-          className="aurora-hero absolute inset-0"
-          style={{ transform: 'scale(1.6)', zIndex: 0 }}
-        />
-        <h1
-          className="relative"
-          style={{
-            fontSize: 'clamp(36px, 5vw, 56px)',
-            fontWeight: 800,
-            letterSpacing: '-0.03em',
-            lineHeight: 1.05,
-            color: '#f0f4ff',
-            zIndex: 1,
-          }}
-        >
-          ¿Qué producto querés
-          <br />
-          <span className="text-gradient-gold">validar hoy?</span>
-        </h1>
-      </div>
+      <h1
+        className="hero-d2 font-black leading-[1.06] mb-3 text-gradient-hero"
+        style={{ fontSize: 'clamp(36px, 5.5vw, 56px)', letterSpacing: '-0.03em' }}
+      >
+        ¿Qué producto querés<br />validar hoy?
+      </h1>
 
-      <p className="hero-d3 text-sm mb-8" style={{ color: '#4a5270', maxWidth: 480, lineHeight: 1.7 }}>
-        El Director de Marketing analiza la viabilidad y coordina a los 3 agentes en secuencia.
+      <p className="hero-d3 text-sm mb-8" style={{ color: '#4a5270', lineHeight: 1.75, maxWidth: 460 }}>
+        El Director de Marketing analiza la viabilidad y coordina a los 3 agentes en secuencia automática.
       </p>
 
       {/* Input + button */}
       <div
-        className="hero-d3 flex gap-2 rounded-2xl p-1.5 transition-all duration-300"
+        className="hero-d4 flex gap-2 rounded-2xl p-1.5 transition-all duration-300"
         style={{
-          background: '#0e1117',
-          border: `1px solid ${focused ? 'rgba(245,158,11,0.4)' : '#1e2530'}`,
-          boxShadow: focused
-            ? '0 0 0 3px rgba(245,158,11,0.06), 0 8px 40px rgba(0,0,0,0.5)'
-            : '0 4px 24px rgba(0,0,0,0.4)',
+          background: 'rgba(255,255,255,0.04)',
+          backdropFilter: 'blur(12px)',
+          border: `1px solid ${focused ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.08)'}`,
+          boxShadow: focused ? '0 0 0 3px rgba(99,102,241,0.08), 0 8px 40px rgba(0,0,0,0.5)' : '0 4px 24px rgba(0,0,0,0.4)',
         }}
       >
         <input
@@ -119,16 +82,24 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
           onKeyDown={e => e.key === 'Enter' && canLaunch && onStart()}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder={placeholder || 'Escribe un producto…'}
+          placeholder={ph || 'Escribe un producto…'}
           className={`flex-1 bg-transparent px-4 py-3.5 text-[15px] font-medium outline-none${!product ? ' typing-cursor' : ''}`}
-          style={{ color: '#f0f4ff', fontFamily: 'Inter, sans-serif', caretColor: '#f59e0b' }}
+          style={{ color: '#f0f4ff', caretColor: '#6366f1' }}
           disabled={disabled}
         />
         <button
           onClick={onStart}
           disabled={!canLaunch}
-          className="btn-launch"
-          style={{ borderRadius: 14, padding: '12px 26px', fontSize: 12 }}
+          className="flex items-center gap-2 rounded-xl text-[12px] font-bold uppercase tracking-widest transition-all duration-200 flex-shrink-0"
+          style={{
+            padding: '12px 26px',
+            background: canLaunch ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'rgba(255,255,255,0.06)',
+            color: canLaunch ? '#fff' : 'rgba(255,255,255,0.25)',
+            boxShadow: canLaunch ? '0 4px 20px rgba(99,102,241,0.35)' : 'none',
+            cursor: canLaunch ? 'pointer' : 'not-allowed',
+          }}
+          onMouseEnter={e => { if (canLaunch) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(99,102,241,0.45)' } }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = canLaunch ? '0 4px 20px rgba(99,102,241,0.35)' : 'none' }}
         >
           <Rocket size={14} strokeWidth={2.5} />
           Lanzar
@@ -137,8 +108,8 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
 
       {/* Example chips */}
       {!disabled && (
-        <div className="hero-d4 flex flex-wrap items-center gap-2 mt-4">
-          <span className="text-[9px] uppercase tracking-[0.22em]" style={{ color: 'rgba(255,255,255,0.18)' }}>
+        <div className="hero-d5 flex flex-wrap items-center gap-2 mt-4">
+          <span className="text-[9px] uppercase tracking-[0.22em]" style={{ color: 'rgba(255,255,255,0.2)' }}>
             Probar con:
           </span>
           {EXAMPLES.map(ex => (
@@ -146,21 +117,9 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
               key={ex}
               onClick={() => setProduct(ex)}
               className="text-[11px] px-3 py-1 rounded-full transition-all duration-150"
-              style={{
-                background: 'rgba(255,255,255,0.025)',
-                border: '1px solid #1e2530',
-                color: 'rgba(255,255,255,0.3)',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = 'rgba(245,158,11,0.35)'
-                e.currentTarget.style.color = '#f59e0b'
-                e.currentTarget.style.background = 'rgba(245,158,11,0.06)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = '#1e2530'
-                e.currentTarget.style.color = 'rgba(255,255,255,0.3)'
-                e.currentTarget.style.background = 'rgba(255,255,255,0.025)'
-              }}
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.32)' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.color = '#a5b4fc'; e.currentTarget.style.background = 'rgba(99,102,241,0.07)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.32)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
             >
               {ex}
             </button>

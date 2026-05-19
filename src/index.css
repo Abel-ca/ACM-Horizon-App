@@ -2,35 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Base ───────────────────────────────────────────────── */
+/* ─── Base ─────────────────────────────────────────────── */
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
 
   body {
-    background-color: #080a0f;
+    background: #080a0f;
     color: #f0f4ff;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    overflow: hidden; /* The app manages its own scroll contexts */
   }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #0a0d12; }
-  ::-webkit-scrollbar-thumb { background: #1e2530; border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 }
 
-/* ─── Keyframes ──────────────────────────────────────────── */
+/* ─── Keyframes ─────────────────────────────────────────── */
 
-/* Dot grid drift */
-@keyframes dotDrift {
-  0%   { background-position: 0 0; }
-  100% { background-position: 28px 28px; }
+/* Blobs */
+@keyframes blobFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(3vw, 2vh) scale(1.04); }
+  66%       { transform: translate(-2vw, 4vh) scale(0.97); }
+}
+@keyframes blobFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-4vw, 3vh) scale(1.06); }
+  70%       { transform: translate(2vw, -2vh) scale(0.96); }
+}
+@keyframes blobFloat3 {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%       { transform: translateX(calc(-50% + 3vw)) scale(1.05); }
 }
 
-/* Pipeline connector particle */
+/* Hero stagger */
+@keyframes heroRise {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Panel entrance */
+@keyframes panelEnter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Node completion bounce */
+@keyframes nodeBounce {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.28); }
+  65%  { transform: scale(0.90); }
+  100% { transform: scale(1); }
+}
+
+/* Pipeline particle */
 @keyframes particleTravel {
   0%   { left: -12px; opacity: 0; }
   6%   { opacity: 1; }
@@ -38,22 +68,25 @@
   100% { left: calc(100% + 12px); opacity: 0; }
 }
 
-/* Pulse ring for active agent node */
+/* Pulsing outer ring on active node */
 @keyframes ringPulse {
-  0%, 100% { opacity: 0.3;  transform: scale(1); }
-  50%       { opacity: 0.65; transform: scale(1.14); }
+  0%, 100% { opacity: 0.28; transform: scale(1); }
+  50%       { opacity: 0.65; transform: scale(1.16); }
 }
 
-/* Card spring entrance */
-@keyframes cardSpring {
-  from { opacity: 0; transform: translateY(28px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+/* Confetti fall variants */
+@keyframes confettiFallA {
+  0%   { transform: translateY(-20px) rotate(0deg) scaleX(1);   opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(540deg) scaleX(0.8); opacity: 0; }
 }
-
-/* Hero elements fade up */
-@keyframes heroFadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0);    }
+@keyframes confettiFallB {
+  0%   { transform: translateY(-20px) translateX(0) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(110vh) translateX(-40px) rotate(-480deg); opacity: 0; }
+}
+@keyframes confettiFallC {
+  0%   { transform: translateY(-20px) translateX(0) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(110vh) translateX(50px) rotate(600deg); opacity: 0; }
 }
 
 /* Skeleton shimmer */
@@ -62,184 +95,153 @@
   100% { background-position: -200% 0; }
 }
 
-/* Skeleton block pulse (subtler alternative) */
-@keyframes skeletonPulse {
-  0%, 100% { opacity: 0.5; }
-  50%       { opacity: 0.9; }
-}
-
-/* Aurora behind hero title */
-@keyframes auroraBreath {
-  0%, 100% { opacity: 0.55; transform: scale(1)    rotate(0deg); }
-  33%       { opacity: 0.85; transform: scale(1.06) rotate(1deg);  }
-  66%       { opacity: 0.65; transform: scale(1.03) rotate(-1deg); }
-}
-
-/* Launch button pulse */
-@keyframes launchPulse {
-  0%, 100% { box-shadow: 0 0 0 0   rgba(245,158,11,0.4); }
-  50%       { box-shadow: 0 0 0 12px rgba(245,158,11,0);   }
-}
-
-/* Breathing glow */
-@keyframes glowBreath {
-  0%, 100% { opacity: 0.45; }
-  50%       { opacity: 0.85; }
-}
-
-/* Cursor blink */
+/* Blink cursor */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
 
-/* System active indicator blink */
-@keyframes systemBlink {
-  0%, 100% { opacity: 1;   transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.8); }
+/* System dot */
+@keyframes systemPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+  50%       { opacity: 0.7; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
 }
 
-/* Scroll-reveal fade-up (controlled by JS class) */
-@keyframes srFadeUp {
-  from { opacity: 0; transform: translateY(22px); }
+/* Launch button */
+@keyframes launchPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.5); }
+  50%       { box-shadow: 0 0 0 10px rgba(99,102,241,0); }
+}
+
+/* Scroll reveal */
+@keyframes srReveal {
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Component classes ──────────────────────────────────── */
+/* ─── Components ────────────────────────────────────────── */
 @layer components {
 
-  /* ── Dot grid background ── */
-  .dot-grid {
-    background-image: radial-gradient(circle, rgba(30,37,48,0.7) 1px, transparent 1px);
-    background-size: 28px 28px;
-    animation: dotDrift 40s linear infinite;
+  /* ── Blobs ── */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .blob-indigo {
+    width: 70vw; height: 70vh;
+    top: -25%; left: -15%;
+    background: radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 65%);
+    animation: blobFloat1 20s ease-in-out infinite;
+  }
+  .blob-purple {
+    width: 65vw; height: 65vh;
+    top: -20%; right: -20%;
+    background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 65%);
+    animation: blobFloat2 25s ease-in-out infinite;
+  }
+  .blob-pink {
+    width: 55vw; height: 55vh;
+    bottom: -20%; left: 50%;
+    background: radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 65%);
+    animation: blobFloat3 22s ease-in-out infinite;
   }
 
-  /* ── Scroll reveal ── */
-  .sr-hidden {
-    opacity: 0;
-    transform: translateY(22px);
-    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  /* ── Glassmorphism ── */
+  .glass {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
   }
-  .sr-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* ── Hero entrance animations ── */
-  .hero-d1 { animation: heroFadeUp 0.55s ease both; }
-  .hero-d2 { animation: heroFadeUp 0.55s 0.08s ease both; }
-  .hero-d3 { animation: heroFadeUp 0.55s 0.18s ease both; }
-  .hero-d4 { animation: heroFadeUp 0.55s 0.30s ease both; }
-
-  /* ── Card entrance ── */
-  .card-enter {
-    animation: cardSpring 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  .glass-dark {
+    background: rgba(8,10,15,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
   }
 
-  /* ── Skeleton line ── */
-  .skeleton-line {
-    background: linear-gradient(
-      90deg,
-      #1e2530 0%,
-      #253040 40%,
-      #1e2530 80%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.8s ease-in-out infinite;
-    border-radius: 4px;
-  }
+  /* ── Hero stagger classes ── */
+  .hero-d1 { animation: heroRise 0.55s 0.00s ease both; }
+  .hero-d2 { animation: heroRise 0.55s 0.10s ease both; }
+  .hero-d3 { animation: heroRise 0.55s 0.20s ease both; }
+  .hero-d4 { animation: heroRise 0.55s 0.30s ease both; }
+  .hero-d5 { animation: heroRise 0.55s 0.40s ease both; }
 
-  /* ── Agent ring (pulsing ring on active node) ── */
-  .agent-ring {
-    animation: ringPulse 1.8s ease-in-out infinite;
-  }
+  /* ── Panel entrance ── */
+  .panel-enter { animation: panelEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* ── Node bounce on completion ── */
+  .node-bounce { animation: nodeBounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+  /* ── Pipeline ring ── */
+  .agent-ring { animation: ringPulse 1.8s ease-in-out infinite; }
 
   /* ── Pipeline particle ── */
   .pipeline-particle {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 28px;
-    height: 3px;
+    top: 50%; transform: translateY(-50%);
+    width: 30px; height: 3px;
     border-radius: 2px;
-    animation: particleTravel 1.6s linear infinite;
+    animation: particleTravel 1.5s linear infinite;
   }
 
-  /* ── Aurora behind hero title ── */
-  .aurora-hero {
-    background:
-      radial-gradient(ellipse 55% 50% at 25% 50%, rgba(245,158,11,0.10) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 50% at 75% 50%, rgba(6,182,212,0.07)  0%, transparent 70%);
-    filter: blur(28px);
-    animation: auroraBreath 7s ease-in-out infinite;
-    pointer-events: none;
+  /* ── Skeleton ── */
+  .skeleton {
+    background: linear-gradient(90deg, #1a2030 0%, #232d3f 40%, #1a2030 80%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: 6px;
   }
 
-  /* ── Streaming output text ── */
+  /* ── Stream text ── */
   .stream-text {
-    font-family: 'IBM Plex Mono', Menlo, Consolas, monospace;
-    font-size: 0.78rem;
-    line-height: 1.85;
+    font-family: 'IBM Plex Mono', Menlo, monospace;
+    font-size: 0.775rem;
+    line-height: 1.9;
     white-space: pre-wrap;
     word-break: break-word;
     color: #7a8299;
   }
 
   /* Blinking cursor while streaming */
-  .cursor-stream::after {
-    content: '▋';
-    color: #f59e0b;
+  .stream-cursor::after {
+    content: '▊';
+    color: #6366f1;
     animation: blink 0.85s step-end infinite;
     font-size: 0.9em;
-  }
-
-  /* Typing cursor in hero input */
-  .typing-cursor::after {
-    content: '|';
-    color: #f59e0b;
-    animation: blink 1s step-end infinite;
     margin-left: 1px;
   }
 
-  /* ── Buttons ── */
-  .btn-launch {
-    @apply flex items-center gap-2 rounded-xl text-sm font-bold uppercase tracking-widest transition-all duration-200;
-    background: #f59e0b;
-    color: #080a0f;
-    padding: 14px 28px;
-    animation: launchPulse 2.8s ease-in-out infinite;
-  }
-  .btn-launch:hover {
-    background: #fbbf24;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(245,158,11,0.35);
-    animation: none;
-  }
-  .btn-launch:disabled {
-    opacity: 0.28;
-    cursor: not-allowed;
-    transform: none;
-    animation: none;
-    box-shadow: none;
+  /* Typing placeholder cursor */
+  .typing-cursor::after {
+    content: '|';
+    color: #6366f1;
+    animation: blink 1s step-end infinite;
+    margin-left: 1px;
+    font-weight: 300;
   }
 
+  /* ── System dot ── */
+  .system-dot { animation: systemPulse 2s ease-in-out infinite; }
+
+  /* ── Buttons ── */
   .btn-approve {
-    @apply flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200;
-    background: rgba(16,185,129,0.08);
-    border: 1px solid rgba(16,185,129,0.35);
+    @apply flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
     color: #10b981;
   }
   .btn-approve:hover {
-    background: rgba(16,185,129,0.15);
-    border-color: rgba(16,185,129,0.65);
-    box-shadow: 0 0 20px rgba(16,185,129,0.18);
+    background: rgba(16,185,129,0.18);
+    border-color: rgba(16,185,129,0.6);
+    box-shadow: 0 0 20px rgba(16,185,129,0.2);
     transform: translateY(-1px);
   }
-
   .btn-redir {
-    @apply flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200;
+    @apply flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200;
     background: transparent;
     border: 1px solid rgba(244,63,94,0.18);
     color: rgba(244,63,94,0.5);
@@ -252,16 +254,19 @@
 
   /* ── Role badge ── */
   .role-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-[0.2em];
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-[0.2em];
   }
 
-  /* ── System active badge ── */
-  .system-dot {
-    animation: systemBlink 2s ease-in-out infinite;
+  /* ── Scroll reveal ── */
+  .sr-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
   }
+  .sr-visible { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Utilities ──────────────────────────────────────────── */
+/* ─── Utilities ─────────────────────────────────────────── */
 @layer utilities {
   .text-gradient-gold {
     background: linear-gradient(135deg, #f59e0b, #fcd34d, #d97706);
@@ -269,9 +274,8 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-
   .text-gradient-hero {
-    background: linear-gradient(135deg, #f0f4ff 30%, #c8d0f0 100%);
+    background: linear-gradient(160deg, #f0f4ff 0%, #a5b4fc 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

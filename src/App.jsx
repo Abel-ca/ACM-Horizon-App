@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Header           from './components/Header'
 import Sidebar          from './components/Sidebar'
 import DotGrid          from './components/DotGrid'
@@ -7,256 +7,331 @@ import ProductInput     from './components/ProductInput'
 import PipelineProgress from './components/PipelineProgress'
 import AgentOutputCard  from './components/AgentOutputCard'
 import CampaignComplete from './components/CampaignComplete'
-import ExportButton     from './components/ExportButton'
-import ScrollReveal     from './components/ScrollReveal'
-import { useWorkflow }       from './hooks/useWorkflow'
+import { useWorkflow }        from './hooks/useWorkflow'
 import { useCampaignHistory } from './hooks/useCampaignHistory'
 import { AGENTS } from './agents/agentConfig'
+import { PALETTE } from './design/agentTheme'
 
-/* ── Empty state illustration ─────────────────────────────── */
-function EmptyState() {
+/* ─── Dimensions ─────────────────────────────────────── */
+const HEADER_H  = 64
+const PIPELINE_H = 104
+const SIDEBAR_W  = 220
+const TOTAL_TOP  = HEADER_H + PIPELINE_H
+
+/* ─── Confetti ───────────────────────────────────────── */
+const FALL_VARIANTS = ['confettiFallA', 'confettiFallB', 'confettiFallC']
+const CONFETTI = Array.from({ length: 65 }, (_, i) => ({
+  id:       i,
+  left:     `${(i * 1.56) % 100}%`,
+  color:    PALETTE[i % PALETTE.length],
+  delay:    `${(i * 0.031) % 1.8}s`,
+  duration: `${1.4 + (i % 6) * 0.12}s`,
+  w:        `${5 + (i % 5)}px`,
+  h:        i % 3 === 2 ? `${14 + (i % 4)}px` : `${5 + (i % 5)}px`,
+  radius:   i % 3 === 0 ? '50%' : i % 3 === 1 ? '2px' : '1px',
+  anim:     FALL_VARIANTS[i % 3],
+}))
+
+function Confetti() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      {/* SVG rocket illustration */}
-      <svg
-        width="120"
-        height="140"
-        viewBox="0 0 120 140"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ marginBottom: 32, opacity: 0.55 }}
-      >
-        {/* Rocket body */}
-        <ellipse cx="60" cy="62" rx="22" ry="38" fill="#1e2530" stroke="#2d3a4a" strokeWidth="1.5"/>
-        {/* Rocket nose */}
-        <path d="M60 8 C44 24 38 44 38 62 H82 C82 44 76 24 60 8Z" fill="#253040" stroke="#2d3a4a" strokeWidth="1.5"/>
-        {/* Window */}
-        <circle cx="60" cy="58" r="10" fill="#0e1117" stroke="#f59e0b" strokeWidth="1.5"/>
-        <circle cx="60" cy="58" r="6" fill="rgba(245,158,11,0.12)"/>
-        {/* Left fin */}
-        <path d="M38 80 L20 100 L38 95Z" fill="#1e2530" stroke="#2d3a4a" strokeWidth="1.5"/>
-        {/* Right fin */}
-        <path d="M82 80 L100 100 L82 95Z" fill="#1e2530" stroke="#2d3a4a" strokeWidth="1.5"/>
-        {/* Exhaust nozzle */}
-        <rect x="50" y="98" width="20" height="8" rx="2" fill="#1e2530" stroke="#2d3a4a" strokeWidth="1.5"/>
-        {/* Flame 1 */}
-        <ellipse cx="60" cy="118" rx="10" ry="14" fill="rgba(245,158,11,0.3)"/>
-        <ellipse cx="60" cy="120" rx="6"  ry="10" fill="rgba(245,158,11,0.5)"/>
-        <ellipse cx="60" cy="122" rx="3"  ry="6"  fill="rgba(253,211,77,0.7)"/>
-        {/* Stars */}
-        <circle cx="16" cy="30" r="1.5" fill="#2d3a4a"/>
-        <circle cx="28" cy="12" r="1"   fill="#2d3a4a"/>
-        <circle cx="94" cy="20" r="1.5" fill="#2d3a4a"/>
-        <circle cx="108" cy="42" r="1"  fill="#2d3a4a"/>
-        <circle cx="10"  cy="58" r="1"  fill="#2d3a4a"/>
-        <circle cx="112" cy="68" r="1.5" fill="#2d3a4a"/>
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 100 }}>
+      {CONFETTI.map(c => (
+        <div
+          key={c.id}
+          style={{
+            position: 'absolute',
+            top: -20,
+            left: c.left,
+            width: c.w,
+            height: c.h,
+            background: c.color,
+            borderRadius: c.radius,
+            opacity: 0.85,
+            animation: `${c.anim} ${c.duration} ${c.delay} ease-in forwards`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+/* ─── PDF export helper ───────────────────────────────── */
+const AGENT_META = {
+  director:   { name: 'Director de Marketing',     color: '#6366f1' },
+  researcher: { name: 'Investigador de Productos', color: '#06b6d4' },
+  copywriter: { name: 'Copywriter de Conversión',  color: '#8b5cf6' },
+  creative:   { name: 'Director Creativo Visual',  color: '#ec4899' },
+}
+
+function openPdf(product, agentStates) {
+  const sections = Object.entries(agentStates)
+    .filter(([, s]) => s.status === 'approved' && s.content)
+    .map(([id, s]) => {
+      const m = AGENT_META[id] || { name: id, color: '#888' }
+      const esc = s.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return `<section style="margin-bottom:48px">
+        <h2 style="font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:${m.color};border-bottom:1px solid ${m.color}33;padding-bottom:8px;margin-bottom:18px">${m.name}</h2>
+        <pre style="font-family:monospace;font-size:11px;line-height:1.9;white-space:pre-wrap;word-break:break-word;color:#222">${esc}</pre>
+      </section>`
+    }).join('')
+  const now = new Date().toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' })
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>ACM Horizon — ${product}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#111;padding:48px;max-width:860px;margin:0 auto}
+  @media print{body{padding:24px}.no-print{display:none}}.cover{margin-bottom:48px;padding-bottom:28px;border-bottom:3px solid #6366f1}
+  .label{font-size:10px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#6366f1;margin-bottom:10px}.title{font-size:28px;font-weight:800;color:#080a0f;margin-bottom:6px}
+  .meta{font-size:11px;color:#666}.btn{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 22px;background:#6366f1;color:#fff;font-weight:800;font-size:12px;letter-spacing:.15em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer}
+  </style></head><body>
+  <div class="cover"><p class="label">ACM Horizon · Brief de Campaña</p><h1 class="title">${product}</h1><p class="meta">Generado el ${now}</p>
+  <button class="btn no-print" onclick="window.print()">⬇ Exportar PDF</button></div>${sections}</body></html>`
+  const w = window.open('', '_blank', 'width=920,height=720')
+  if (!w) return
+  w.document.write(html)
+  w.document.close()
+  setTimeout(() => w.print(), 800)
+}
+
+/* ─── Empty state ─────────────────────────────────────── */
+function EmptyHero() {
+  return (
+    <div className="flex flex-col items-center justify-center pt-16 pb-8 text-center">
+      {/* Rocket SVG */}
+      <svg width="100" height="120" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg"
+           style={{ marginBottom: 28, opacity: 0.5 }}>
+        <ellipse cx="50" cy="52" rx="18" ry="32" fill="#1a2030" stroke="#232d3f" strokeWidth="1.5"/>
+        <path d="M50 8C36 22 32 38 32 52H68C68 38 64 22 50 8Z" fill="#1e2535" stroke="#232d3f" strokeWidth="1.5"/>
+        <circle cx="50" cy="48" r="9" fill="#0e1117" stroke="#6366f1" strokeWidth="1.5"/>
+        <circle cx="50" cy="48" r="5" fill="rgba(99,102,241,0.15)"/>
+        <path d="M32 68L16 86L32 80Z" fill="#1a2030" stroke="#232d3f" strokeWidth="1.5"/>
+        <path d="M68 68L84 86L68 80Z" fill="#1a2030" stroke="#232d3f" strokeWidth="1.5"/>
+        <rect x="42" y="82" width="16" height="7" rx="2" fill="#1a2030" stroke="#232d3f" strokeWidth="1.5"/>
+        <ellipse cx="50" cy="100" rx="8" ry="11" fill="rgba(99,102,241,0.25)"/>
+        <ellipse cx="50" cy="103" rx="5" ry="7"  fill="rgba(99,102,241,0.45)"/>
+        <ellipse cx="50" cy="106" rx="2.5" ry="4" fill="rgba(165,180,252,0.6)"/>
+        <circle cx="12" cy="24" r="1.2" fill="#232d3f"/>
+        <circle cx="22" cy="8"  r="0.9" fill="#232d3f"/>
+        <circle cx="82" cy="16" r="1.2" fill="#232d3f"/>
+        <circle cx="92" cy="36" r="0.9" fill="#232d3f"/>
+        <circle cx="6"  cy="50" r="0.9" fill="#232d3f"/>
+        <circle cx="96" cy="58" r="1.2" fill="#232d3f"/>
       </svg>
 
-      <h3
-        className="font-extrabold mb-3 tracking-tight"
-        style={{ fontSize: 22, color: '#f0f4ff', letterSpacing: '-0.02em' }}
-      >
-        Tu primera campaña está a un<br />
-        <span className="text-gradient-gold">producto de distancia</span>
+      <h3 className="font-black mb-2 tracking-tight" style={{ fontSize: 22, color: '#f0f4ff', letterSpacing: '-0.02em' }}>
+        Tu primera campaña está a un
+        <br />
+        <span className="text-gradient-hero">producto de distancia</span>
       </h3>
-      <p className="text-sm max-w-xs" style={{ color: '#3a4255', lineHeight: 1.7 }}>
-        Escribe un producto arriba y los 4 agentes de IA construirán tu brief completo en segundos.
+      <p className="text-sm max-w-xs" style={{ color: '#3a4255', lineHeight: 1.8 }}>
+        Escribe un producto arriba y los 4 agentes de IA construirán tu brief completo.
       </p>
 
       {/* Idle agent icons */}
-      <div className="flex items-center gap-4 mt-10">
-        {AGENTS.map(agent => (
-          <div key={agent.id} className="flex flex-col items-center gap-2">
-            <div
-              className="flex items-center justify-center rounded-xl"
-              style={{
-                width: 42,
-                height: 42,
-                background: `${agent.colorAlpha}0.06)`,
-                border: `1px solid ${agent.colorAlpha}0.15)`,
-                color: agent.color,
-                fontSize: 20,
-                opacity: 0.55,
-              }}
-            >
-              {agent.icon}
+      <div className="flex items-center gap-5 mt-10">
+        {AGENTS.map((a, i) => {
+          const colors = ['#6366f1', '#06b6d4', '#8b5cf6', '#ec4899']
+          return (
+            <div key={a.id} className="flex flex-col items-center gap-2" style={{ opacity: 0.4 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 12,
+                background: `${colors[i]}12`,
+                border: `1px solid ${colors[i]}22`,
+                color: colors[i], fontSize: 18,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>{a.icon}</div>
+              <span className="text-[7px] uppercase tracking-[0.2em] font-bold" style={{ color: colors[i] }}>
+                {a.role}
+              </span>
             </div>
-            <span
-              className="text-[8px] uppercase tracking-[0.2em] font-bold"
-              style={{ color: agent.color, opacity: 0.45 }}
-            >
-              {agent.role}
-            </span>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
 }
 
-/* ── App ─────────────────────────────────────────────────── */
+/* ─── App ─────────────────────────────────────────────── */
 export default function App() {
-  const [apiKey, setApiKey]             = useState(() => localStorage.getItem('acm_api_key') || '')
-  const [showApiModal, setShowApiModal] = useState(() => !localStorage.getItem('acm_api_key'))
+  const [apiKey, setApiKey]     = useState(() => localStorage.getItem('acm_api_key') || '')
+  const [showModal, setShowModal] = useState(() => !localStorage.getItem('acm_api_key'))
 
   const {
     product, setProduct,
-    workflowStarted, currentAgentIndex,
-    agentStates, campaignComplete,
+    workflowStarted, agentStates, campaignComplete,
     startWorkflow, approveAgent, rejectAgent, reset,
   } = useWorkflow()
 
-  const {
-    campaigns, saveCampaign,
-    totalCampaigns, totalCost, validatedProducts,
-  } = useCampaignHistory()
+  const { campaigns, saveCampaign, totalCampaigns, totalCost, validatedProducts } = useCampaignHistory()
 
-  /* Save campaign when all 4 agents complete */
+  /* Panel fade state */
+  const [panelOpacity, setPanelOpacity] = useState(1)
+  const approveRef = useRef(false)
+
+  /* Confetti on complete */
+  const [showConfetti, setShowConfetti] = useState(false)
+  const confettiShown = useRef(false)
+
   useEffect(() => {
-    if (campaignComplete && product) saveCampaign(product, agentStates)
+    if (campaignComplete && !confettiShown.current) {
+      confettiShown.current = true
+      saveCampaign(product, agentStates)
+      setShowConfetti(true)
+      setTimeout(() => setShowConfetti(false), 3500)
+    }
   }, [campaignComplete]) // eslint-disable-line
 
-  /* ── Handlers ──────────────────────────────────────────── */
-  const handleSaveApiKey = key => {
+  /* Reset confetti flag on new workflow */
+  useEffect(() => {
+    if (!workflowStarted) confettiShown.current = false
+  }, [workflowStarted])
+
+  /* ── Handlers ──────────────────────────────────────── */
+  const handleSave = key => {
     setApiKey(key)
     localStorage.setItem('acm_api_key', key)
-    setShowApiModal(false)
+    setShowModal(false)
   }
-
   const handleStart = () => {
-    if (!apiKey) { setShowApiModal(true); return }
+    if (!apiKey) { setShowModal(true); return }
     startWorkflow(product, apiKey)
   }
+  const handleApprove = index => {
+    if (approveRef.current) return
+    approveRef.current = true
+    setPanelOpacity(0)
+    setTimeout(() => { approveAgent(index, apiKey) }, 320)
+    setTimeout(() => { setPanelOpacity(1); approveRef.current = false }, 800)
+  }
+  const handleReject = index => {
+    setPanelOpacity(0)
+    setTimeout(() => { rejectAgent(index, apiKey); setTimeout(() => setPanelOpacity(1), 150) }, 220)
+  }
+  const handleReset = () => {
+    confettiShown.current = false
+    reset()
+  }
 
-  const handleApprove = index => approveAgent(index, apiKey)
-  const handleReject  = index => rejectAgent(index, apiKey)
+  /* ── Displayed agent — the first non-pending, non-approved one ── */
+  const displayed = (() => {
+    if (!workflowStarted) return null
+    for (let i = 0; i < AGENTS.length; i++) {
+      const s = agentStates[AGENTS[i].id]
+      if (['active', 'streaming', 'complete', 'error'].includes(s.status))
+        return { agent: AGENTS[i], state: s, index: i }
+    }
+    return null
+  })()
 
-  /* ── Render ────────────────────────────────────────────── */
+  /* ── Render ────────────────────────────────────────── */
   return (
-    <div className="min-h-screen" style={{ background: '#080a0f' }}>
+    <div style={{ height: '100vh', overflow: 'hidden', background: '#080a0f' }}>
 
-      {/* Ambient dot grid */}
+      {/* Ambient blobs */}
       <DotGrid />
 
-      {/* Fixed top header */}
+      {/* ── Fixed Header ── */}
       <Header
         apiKey={apiKey}
-        onOpenApiModal={() => setShowApiModal(true)}
-        onReset={reset}
+        onOpenApiModal={() => setShowModal(true)}
+        onReset={handleReset}
         totalCampaigns={totalCampaigns}
         totalCost={totalCost}
         validatedProducts={validatedProducts}
       />
 
-      {/* Fixed left sidebar */}
-      <Sidebar campaigns={campaigns} onNewCampaign={reset} />
+      {/* ── Fixed Sidebar ── */}
+      <Sidebar campaigns={campaigns} onNewCampaign={handleReset} />
 
-      {/* Main content — offset by header 64px + sidebar 220px */}
-      <main
-        className="relative z-10 min-h-screen"
-        style={{ paddingTop: '64px', paddingLeft: '220px' }}
+      {/* ── Fixed Pipeline Bar ── */}
+      {workflowStarted && (
+        <div
+          style={{
+            position: 'fixed',
+            top: HEADER_H,
+            left: SIDEBAR_W,
+            right: 0,
+            height: PIPELINE_H,
+            zIndex: 35,
+            background: 'rgba(8,10,15,0.9)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 40px',
+          }}
+        >
+          <PipelineProgress agentStates={agentStates} campaignComplete={campaignComplete} />
+        </div>
+      )}
+
+      {/* ── Main content area — fixed, fills remaining space ── */}
+      <div
+        style={{
+          position: 'fixed',
+          top: workflowStarted ? TOTAL_TOP : HEADER_H,
+          left: SIDEBAR_W,
+          right: 0,
+          bottom: 0,
+          overflow: 'hidden',
+          zIndex: 10,
+          transition: 'top 0.3s ease',
+        }}
       >
-        <div className="max-w-3xl mx-auto px-8 py-14">
 
-          {/* ── IDLE STATE: hero + empty state ── */}
-          {!workflowStarted && (
-            <section>
+        {/* NOT started: hero + empty state */}
+        {!workflowStarted && (
+          <div style={{ height: '100%', overflowY: 'auto' }}>
+            <div style={{ maxWidth: 680, margin: '0 auto', padding: '52px 40px 80px' }}>
               <ProductInput
                 product={product}
                 setProduct={setProduct}
                 onStart={handleStart}
                 disabled={false}
               />
-              <EmptyState />
-            </section>
-          )}
-
-          {/* ── ACTIVE WORKFLOW ── */}
-          {workflowStarted && (
-            <div className="space-y-8">
-
-              {/* Product label */}
-              <div className="flex items-center gap-3">
-                <div
-                  className="px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest"
-                  style={{
-                    background: 'rgba(245,158,11,0.08)',
-                    border: '1px solid rgba(245,158,11,0.2)',
-                    color: '#f59e0b',
-                  }}
-                >
-                  Analizando
-                </div>
-                <h2
-                  className="font-extrabold tracking-tight"
-                  style={{ fontSize: 20, color: '#f0f4ff' }}
-                >
-                  {product}
-                </h2>
-              </div>
-
-              {/* Pipeline tracker */}
-              <ScrollReveal>
-                <div
-                  className="rounded-2xl px-6 py-6"
-                  style={{
-                    background: '#0e1117',
-                    border: '1px solid #1e2530',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-                  }}
-                >
-                  <p
-                    className="text-[8px] font-extrabold uppercase tracking-[0.3em] mb-6"
-                    style={{ color: '#3a4255' }}
-                  >
-                    Pipeline de campaña
-                  </p>
-                  <PipelineProgress
-                    agentStates={agentStates}
-                    campaignComplete={campaignComplete}
-                  />
-                </div>
-              </ScrollReveal>
-
-              {/* Agent output cards */}
-              <div className="space-y-5">
-                {AGENTS.map((agent, index) => {
-                  const state = agentStates[agent.id]
-                  if (state.status === 'pending') return null
-                  return (
-                    <ScrollReveal key={agent.id} delay={index * 60}>
-                      <AgentOutputCard
-                        agent={agent}
-                        state={state}
-                        onApprove={() => handleApprove(index)}
-                        onReject={() => handleReject(index)}
-                      />
-                    </ScrollReveal>
-                  )
-                })}
-              </div>
-
-              {/* Campaign complete */}
-              {campaignComplete && (
-                <ScrollReveal>
-                  <CampaignComplete onReset={reset} />
-                </ScrollReveal>
-              )}
+              <EmptyHero />
             </div>
-          )}
-        </div>
-      </main>
+          </div>
+        )}
 
-      {/* Floating PDF export — only when campaign is done */}
-      {campaignComplete && (
-        <ExportButton product={product} agentStates={agentStates} />
-      )}
+        {/* Campaign complete screen */}
+        {workflowStarted && campaignComplete && (
+          <div style={{ height: '100%', overflowY: 'auto', padding: '24px 32px' }}>
+            <CampaignComplete
+              onReset={handleReset}
+              onExport={() => openPdf(product, agentStates)}
+            />
+          </div>
+        )}
+
+        {/* Single agent panel */}
+        {workflowStarted && !campaignComplete && displayed && (
+          <div
+            key={displayed.agent.id}
+            style={{
+              height: '100%',
+              padding: '20px 32px 20px',
+              opacity: panelOpacity,
+              transition: 'opacity 0.28s ease',
+            }}
+          >
+            <AgentOutputCard
+              agent={displayed.agent}
+              state={displayed.state}
+              onApprove={() => handleApprove(displayed.index)}
+              onReject={() => handleReject(displayed.index)}
+              style={{ height: '100%' }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Confetti */}
+      {showConfetti && <Confetti />}
 
       {/* API key modal */}
-      {showApiModal && (
+      {showModal && (
         <ApiKeyModal
-          onSave={handleSaveApiKey}
-          onClose={() => setShowApiModal(false)}
+          onSave={handleSave}
+          onClose={() => setShowModal(false)}
           hasKey={!!apiKey}
         />
       )}
