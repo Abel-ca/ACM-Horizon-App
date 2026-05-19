@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Header           from './components/Header'
 import Sidebar          from './components/Sidebar'
 import DotGrid          from './components/DotGrid'
@@ -195,9 +195,14 @@ export default function App() {
     }
     setShowModal(false)
   }
+  const handleMetaTokenRefreshed = useCallback((newToken) => {
+    setMetaToken(newToken)
+    localStorage.setItem('meta_ads_token', newToken)
+  }, [])
+
   const handleStart = () => {
     if (!apiKey) { setShowModal(true); return }
-    startWorkflow(product, apiKey, metaToken)
+    startWorkflow(product, apiKey, metaToken, handleMetaTokenRefreshed)
   }
   const handleApprove = index => {
     if (approveRef.current) return
