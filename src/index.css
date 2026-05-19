@@ -2,91 +2,195 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Base ───────────────────────────────────────────────── */
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
 
   body {
-    background-color: #06070f;
-    color: #f0f2ff;
-    font-family: 'Syne', system-ui, sans-serif;
+    background-color: #080a0f;
+    color: #f0f4ff;
+    font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #0a0b18; }
-  ::-webkit-scrollbar-thumb { background: #1e2248; border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: #f0b429; }
+  ::-webkit-scrollbar-track { background: #0a0d12; }
+  ::-webkit-scrollbar-thumb { background: #1e2530; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
 }
 
-/* ─── Keyframes ─────────────────────────────────────────── */
+/* ─── Keyframes ──────────────────────────────────────────── */
+
+/* Dot grid drift */
 @keyframes dotDrift {
   0%   { background-position: 0 0; }
   100% { background-position: 28px 28px; }
 }
-@keyframes flowRight {
-  from { left: -45%; }
-  to   { left: 145%; }
+
+/* Pipeline connector particle */
+@keyframes particleTravel {
+  0%   { left: -12px; opacity: 0; }
+  6%   { opacity: 1; }
+  94%  { opacity: 1; }
+  100% { left: calc(100% + 12px); opacity: 0; }
 }
+
+/* Pulse ring for active agent node */
 @keyframes ringPulse {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50%       { opacity: 0.7;  transform: scale(1.12); }
+  0%, 100% { opacity: 0.3;  transform: scale(1); }
+  50%       { opacity: 0.65; transform: scale(1.14); }
 }
+
+/* Card spring entrance */
 @keyframes cardSpring {
-  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
+
+/* Hero elements fade up */
 @keyframes heroFadeUp {
-  from { opacity: 0; transform: translateY(24px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0);    }
 }
-@keyframes sectionSlide {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0);    }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
-}
-@keyframes cursorBeat {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
-}
-@keyframes launchPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(240,180,41,0.4); }
-  50%       { box-shadow: 0 0 0 12px rgba(240,180,41,0);  }
-}
-@keyframes glowBreath {
+
+/* Skeleton block pulse (subtler alternative) */
+@keyframes skeletonPulse {
   0%, 100% { opacity: 0.5; }
   50%       { opacity: 0.9; }
 }
 
-/* ─── Component classes ─────────────────────────────────── */
+/* Aurora behind hero title */
+@keyframes auroraBreath {
+  0%, 100% { opacity: 0.55; transform: scale(1)    rotate(0deg); }
+  33%       { opacity: 0.85; transform: scale(1.06) rotate(1deg);  }
+  66%       { opacity: 0.65; transform: scale(1.03) rotate(-1deg); }
+}
+
+/* Launch button pulse */
+@keyframes launchPulse {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(245,158,11,0.4); }
+  50%       { box-shadow: 0 0 0 12px rgba(245,158,11,0);   }
+}
+
+/* Breathing glow */
+@keyframes glowBreath {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 0.85; }
+}
+
+/* Cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* System active indicator blink */
+@keyframes systemBlink {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Scroll-reveal fade-up (controlled by JS class) */
+@keyframes srFadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Component classes ──────────────────────────────────── */
 @layer components {
 
-  /* Dot grid background */
+  /* ── Dot grid background ── */
   .dot-grid {
-    background-image: radial-gradient(circle, rgba(45,48,104,0.55) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(30,37,48,0.7) 1px, transparent 1px);
     background-size: 28px 28px;
-    animation: dotDrift 30s linear infinite;
+    animation: dotDrift 40s linear infinite;
   }
 
-  /* Streaming text in outputs */
+  /* ── Scroll reveal ── */
+  .sr-hidden {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sr-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Hero entrance animations ── */
+  .hero-d1 { animation: heroFadeUp 0.55s ease both; }
+  .hero-d2 { animation: heroFadeUp 0.55s 0.08s ease both; }
+  .hero-d3 { animation: heroFadeUp 0.55s 0.18s ease both; }
+  .hero-d4 { animation: heroFadeUp 0.55s 0.30s ease both; }
+
+  /* ── Card entrance ── */
+  .card-enter {
+    animation: cardSpring 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* ── Skeleton line ── */
+  .skeleton-line {
+    background: linear-gradient(
+      90deg,
+      #1e2530 0%,
+      #253040 40%,
+      #1e2530 80%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: 4px;
+  }
+
+  /* ── Agent ring (pulsing ring on active node) ── */
+  .agent-ring {
+    animation: ringPulse 1.8s ease-in-out infinite;
+  }
+
+  /* ── Pipeline particle ── */
+  .pipeline-particle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 3px;
+    border-radius: 2px;
+    animation: particleTravel 1.6s linear infinite;
+  }
+
+  /* ── Aurora behind hero title ── */
+  .aurora-hero {
+    background:
+      radial-gradient(ellipse 55% 50% at 25% 50%, rgba(245,158,11,0.10) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 75% 50%, rgba(6,182,212,0.07)  0%, transparent 70%);
+    filter: blur(28px);
+    animation: auroraBreath 7s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* ── Streaming output text ── */
   .stream-text {
     font-family: 'IBM Plex Mono', Menlo, Consolas, monospace;
     font-size: 0.78rem;
-    line-height: 1.8;
+    line-height: 1.85;
     white-space: pre-wrap;
     word-break: break-word;
-    color: #8b90c0;
+    color: #7a8299;
   }
 
-  /* Blinking cursor during streaming */
+  /* Blinking cursor while streaming */
   .cursor-stream::after {
     content: '▋';
-    color: #f0b429;
+    color: #f59e0b;
     animation: blink 0.85s step-end infinite;
     font-size: 0.9em;
   }
@@ -94,61 +198,51 @@
   /* Typing cursor in hero input */
   .typing-cursor::after {
     content: '|';
-    color: #f0b429;
-    animation: cursorBeat 1s step-end infinite;
-    font-weight: 400;
+    color: #f59e0b;
+    animation: blink 1s step-end infinite;
     margin-left: 1px;
   }
 
-  /* Pipeline connector flowing light */
-  .flow-light {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 45%;
-    left: -45%;
-    animation: flowRight 1.6s linear infinite;
+  /* ── Buttons ── */
+  .btn-launch {
+    @apply flex items-center gap-2 rounded-xl text-sm font-bold uppercase tracking-widest transition-all duration-200;
+    background: #f59e0b;
+    color: #080a0f;
+    padding: 14px 28px;
+    animation: launchPulse 2.8s ease-in-out infinite;
+  }
+  .btn-launch:hover {
+    background: #fbbf24;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(245,158,11,0.35);
+    animation: none;
+  }
+  .btn-launch:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+    transform: none;
+    animation: none;
+    box-shadow: none;
   }
 
-  /* Active agent outer ring */
-  .agent-ring {
-    animation: ringPulse 1.6s ease-in-out infinite;
-  }
-
-  /* Output card entrance */
-  .card-enter {
-    animation: cardSpring 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
-
-  /* Hero fade-in sections */
-  .hero-d1 { animation: heroFadeUp 0.6s ease forwards; }
-  .hero-d2 { animation: heroFadeUp 0.6s 0.12s ease both; }
-  .hero-d3 { animation: heroFadeUp 0.6s 0.24s ease both; }
-  .hero-d4 { animation: heroFadeUp 0.6s 0.36s ease both; }
-
-  /* Pipeline section entrance */
-  .section-enter { animation: sectionSlide 0.45s ease both; }
-
-  /* Approve button */
   .btn-approve {
     @apply flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200;
-    background: rgba(16,185,129,0.1);
-    border: 1px solid rgba(16,185,129,0.4);
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.35);
     color: #10b981;
   }
   .btn-approve:hover {
-    background: rgba(16,185,129,0.18);
-    border-color: rgba(16,185,129,0.7);
-    box-shadow: 0 0 18px rgba(16,185,129,0.2);
+    background: rgba(16,185,129,0.15);
+    border-color: rgba(16,185,129,0.65);
+    box-shadow: 0 0 20px rgba(16,185,129,0.18);
     transform: translateY(-1px);
   }
 
-  /* Redirigir button */
   .btn-redir {
     @apply flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200;
     background: transparent;
-    border: 1px solid rgba(244,63,94,0.2);
-    color: rgba(244,63,94,0.55);
+    border: 1px solid rgba(244,63,94,0.18);
+    color: rgba(244,63,94,0.5);
   }
   .btn-redir:hover {
     background: rgba(244,63,94,0.07);
@@ -156,37 +250,28 @@
     color: #f43f5e;
   }
 
-  /* Primary launch button */
-  .btn-launch {
-    @apply flex items-center gap-2 px-7 py-4 rounded-xl text-sm font-extrabold uppercase tracking-widest transition-all duration-200;
-    background: #f0b429;
-    color: #06070f;
-    animation: launchPulse 2.5s ease-in-out infinite;
-  }
-  .btn-launch:hover {
-    background: #f5c842;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(240,180,41,0.4);
-    animation: none;
-  }
-  .btn-launch:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    transform: none;
-    animation: none;
-    box-shadow: none;
-  }
-
-  /* Role badge */
+  /* ── Role badge ── */
   .role-badge {
     @apply inline-flex items-center px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-[0.2em];
   }
+
+  /* ── System active badge ── */
+  .system-dot {
+    animation: systemBlink 2s ease-in-out infinite;
+  }
 }
 
-/* ─── Utilities ─────────────────────────────────────────── */
+/* ─── Utilities ──────────────────────────────────────────── */
 @layer utilities {
   .text-gradient-gold {
-    background: linear-gradient(135deg, #f0b429, #ffd166, #d4950a);
+    background: linear-gradient(135deg, #f59e0b, #fcd34d, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-hero {
+    background: linear-gradient(135deg, #f0f4ff 30%, #c8d0f0 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
