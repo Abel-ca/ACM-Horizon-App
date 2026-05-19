@@ -269,17 +269,12 @@ Tienes acceso a búsqueda web en tiempo real mediante la función web_search. Ú
 ### Secuencia de búsquedas obligatoria (ejecutar en este orden):
 
 **Búsqueda 1 — Anuncios activos en Facebook Ad Library**
-Busca directamente en la librería pública de anuncios de Meta para detectar qué competidores están pagando y qué ángulos están usando hoy.
-Consultas a ejecutar (en este orden, para los 4 países):
-- "site:facebook.com/ads/library [producto] Ecuador"
-- "site:facebook.com/ads/library [producto] Colombia"
-- "[producto] anuncio Facebook activo Ecuador 2025"
-- "[producto] Facebook ads dropshipping latinoamérica"
-URLs directas de referencia (úsalas como contexto de búsqueda):
-- https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=EC&q=[producto]
-- https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=CO&q=[producto]
-- https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=MX&q=[producto]
-- https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=PE&q=[producto]
+Usa web_search con estas consultas para encontrar qué competidores están pautando y qué ángulos usan hoy. **Nunca intentes conectarte directamente a ninguna API — usa exclusivamente web_search.**
+Consultas a ejecutar (en este orden):
+- "facebook ads library [producto] Ecuador activo"
+- "facebook ads library [producto] Colombia activo"
+- "[producto] anuncio Facebook dropshipping latinoamérica 2025"
+- "[producto] Facebook ads copy ganador Ecuador"
 → Detecta: cuántos anunciantes activos hay, cuánto tiempo llevan corriendo, qué ángulos y copies predominan, qué formatos usan (imagen, video, carrusel).
 → Un anuncio que lleva semanas o meses activo = señal de que convierte. Muchos anunciantes similares = saturación.
 
