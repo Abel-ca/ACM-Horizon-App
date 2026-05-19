@@ -3,13 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
 
   body {
     background-color: #06070f;
@@ -20,135 +15,180 @@
     overflow-x: hidden;
   }
 
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #0d0e1e;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #2d3068;
-    border-radius: 2px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #f0b429;
-  }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #0a0b18; }
+  ::-webkit-scrollbar-thumb { background: #1e2248; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #f0b429; }
 }
 
+/* ─── Keyframes ─────────────────────────────────────────── */
+@keyframes dotDrift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 28px 28px; }
+}
+@keyframes flowRight {
+  from { left: -45%; }
+  to   { left: 145%; }
+}
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%       { opacity: 0.7;  transform: scale(1.12); }
+}
+@keyframes cardSpring {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes sectionSlide {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@keyframes cursorBeat {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@keyframes launchPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240,180,41,0.4); }
+  50%       { box-shadow: 0 0 0 12px rgba(240,180,41,0);  }
+}
+@keyframes glowBreath {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.9; }
+}
+
+/* ─── Component classes ─────────────────────────────────── */
 @layer components {
-  /* Grid background pattern */
-  .grid-bg {
-    background-image:
-      linear-gradient(rgba(45, 48, 104, 0.25) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(45, 48, 104, 0.25) 1px, transparent 1px);
-    background-size: 48px 48px;
+
+  /* Dot grid background */
+  .dot-grid {
+    background-image: radial-gradient(circle, rgba(45,48,104,0.55) 1px, transparent 1px);
+    background-size: 28px 28px;
+    animation: dotDrift 30s linear infinite;
   }
 
-  /* Scanline sweep effect */
-  .scanline {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(to right, transparent, rgba(240, 180, 41, 0.4), transparent);
-    animation: scan 8s linear infinite;
-    pointer-events: none;
-    z-index: 50;
-    opacity: 0.6;
-  }
-
-  /* Agent output streaming text */
+  /* Streaming text in outputs */
   .stream-text {
     font-family: 'IBM Plex Mono', Menlo, Consolas, monospace;
-    font-size: 0.8rem;
-    line-height: 1.75;
+    font-size: 0.78rem;
+    line-height: 1.8;
     white-space: pre-wrap;
     word-break: break-word;
     color: #8b90c0;
   }
 
-  /* Blinking cursor for streaming */
+  /* Blinking cursor during streaming */
   .cursor-stream::after {
     content: '▋';
     color: #f0b429;
-    animation: blink 0.9s step-end infinite;
+    animation: blink 0.85s step-end infinite;
     font-size: 0.9em;
   }
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0; }
+  /* Typing cursor in hero input */
+  .typing-cursor::after {
+    content: '|';
+    color: #f0b429;
+    animation: cursorBeat 1s step-end infinite;
+    font-weight: 400;
+    margin-left: 1px;
   }
+
+  /* Pipeline connector flowing light */
+  .flow-light {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 45%;
+    left: -45%;
+    animation: flowRight 1.6s linear infinite;
+  }
+
+  /* Active agent outer ring */
+  .agent-ring {
+    animation: ringPulse 1.6s ease-in-out infinite;
+  }
+
+  /* Output card entrance */
+  .card-enter {
+    animation: cardSpring 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* Hero fade-in sections */
+  .hero-d1 { animation: heroFadeUp 0.6s ease forwards; }
+  .hero-d2 { animation: heroFadeUp 0.6s 0.12s ease both; }
+  .hero-d3 { animation: heroFadeUp 0.6s 0.24s ease both; }
+  .hero-d4 { animation: heroFadeUp 0.6s 0.36s ease both; }
+
+  /* Pipeline section entrance */
+  .section-enter { animation: sectionSlide 0.45s ease both; }
 
   /* Approve button */
   .btn-approve {
-    @apply flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.4);
+    @apply flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.4);
     color: #10b981;
   }
   .btn-approve:hover {
-    background: rgba(16, 185, 129, 0.2);
-    border-color: rgba(16, 185, 129, 0.7);
-    box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+    background: rgba(16,185,129,0.18);
+    border-color: rgba(16,185,129,0.7);
+    box-shadow: 0 0 18px rgba(16,185,129,0.2);
+    transform: translateY(-1px);
   }
 
-  /* Reject/regenerate button */
-  .btn-regen {
-    @apply flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200;
+  /* Redirigir button */
+  .btn-redir {
+    @apply flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200;
     background: transparent;
-    border: 1px solid rgba(244, 63, 94, 0.2);
-    color: rgba(244, 63, 94, 0.6);
+    border: 1px solid rgba(244,63,94,0.2);
+    color: rgba(244,63,94,0.55);
   }
-  .btn-regen:hover {
-    background: rgba(244, 63, 94, 0.08);
-    border-color: rgba(244, 63, 94, 0.45);
+  .btn-redir:hover {
+    background: rgba(244,63,94,0.07);
+    border-color: rgba(244,63,94,0.5);
     color: #f43f5e;
   }
 
-  /* Primary action button */
-  .btn-primary {
-    @apply flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold uppercase tracking-widest transition-all duration-200;
+  /* Primary launch button */
+  .btn-launch {
+    @apply flex items-center gap-2 px-7 py-4 rounded-xl text-sm font-extrabold uppercase tracking-widest transition-all duration-200;
     background: #f0b429;
     color: #06070f;
+    animation: launchPulse 2.5s ease-in-out infinite;
   }
-  .btn-primary:hover {
+  .btn-launch:hover {
     background: #f5c842;
-    box-shadow: 0 0 28px rgba(240, 180, 41, 0.35);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(240,180,41,0.4);
+    animation: none;
   }
-  .btn-primary:disabled {
-    opacity: 0.35;
+  .btn-launch:disabled {
+    opacity: 0.3;
     cursor: not-allowed;
     transform: none;
+    animation: none;
     box-shadow: none;
   }
 
-  /* Agent card base */
-  .agent-card {
-    @apply relative rounded-xl overflow-hidden transition-all duration-500;
-    background: #0d0e1e;
-    border: 1px solid #1a1c38;
-    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  /* Ghost tag badge */
+  /* Role badge */
   .role-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-[0.2em];
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-[0.2em];
   }
 }
 
+/* ─── Utilities ─────────────────────────────────────────── */
 @layer utilities {
   .text-gradient-gold {
-    background: linear-gradient(135deg, #f0b429, #f5c842, #d4950a);
+    background: linear-gradient(135deg, #f0b429, #ffd166, #d4950a);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-  }
-
-  .glow-gold {
-    text-shadow: 0 0 20px rgba(240, 180, 41, 0.5);
   }
 }

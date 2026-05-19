@@ -1,113 +1,60 @@
-import { Check, RefreshCw, CheckCircle, Loader, AlertTriangle } from 'lucide-react'
+import { Check, RotateCcw, CheckCircle, Loader, AlertTriangle, Copy } from 'lucide-react'
+import { useState } from 'react'
 
+/* ── Inline bold parser ──────────────────────────────────────── */
 function parseInlineBold(text) {
   const parts = text.split(/(\*\*[^*]+\*\*)/)
   if (parts.length === 1) return text
   return parts.map((part, i) =>
-    /^\*\*[^*]+\*\*$/.test(part) ? (
-      <strong key={i} style={{ color: '#f0f2ff', fontWeight: 600 }}>
-        {part.slice(2, -2)}
-      </strong>
-    ) : (
-      part
-    )
+    /^\*\*[^*]+\*\*$/.test(part)
+      ? <strong key={i} style={{ color: '#e8ecff', fontWeight: 600 }}>{part.slice(2, -2)}</strong>
+      : part
   )
 }
 
+/* ── Formatted markdown output ───────────────────────────────── */
 function FormattedOutput({ content, accentColor }) {
-  const lines = content.split('\n')
-
   return (
     <div className="space-y-0.5">
-      {lines.map((line, i) => {
-        const trimmed = line.trim()
-        if (!trimmed) return <div key={i} style={{ height: '0.6rem' }} />
+      {content.split('\n').map((line, i) => {
+        const t = line.trim()
+        if (!t) return <div key={i} style={{ height: '0.55rem' }} />
 
-        // Bold-only lines → section header
-        if (/^\*\*[^*]+\*\*:?$/.test(trimmed)) {
-          const text = trimmed.replace(/\*\*/g, '').replace(/:$/, '')
+        if (/^\*\*[^*]+\*\*:?$/.test(t)) {
           return (
-            <p
-              key={i}
-              className="text-[10px] font-bold uppercase tracking-[0.2em] pt-3 pb-0.5"
-              style={{ color: accentColor }}
-            >
-              {text}
+            <p key={i} className="text-[10px] font-extrabold uppercase tracking-[0.22em] pt-3 pb-0.5"
+               style={{ color: accentColor }}>
+              {t.replace(/\*\*/g, '').replace(/:$/, '')}
             </p>
           )
         }
+        if (t.startsWith('### ')) return <p key={i} className="text-sm font-semibold pt-2 pb-0.5" style={{ color: '#f0f2ff' }}>{t.slice(4)}</p>
+        if (t.startsWith('## '))  return <p key={i} className="text-xs font-bold uppercase tracking-[0.15em] pt-3 pb-0.5" style={{ color: accentColor }}>{t.slice(3)}</p>
+        if (t.startsWith('# '))   return <p key={i} className="text-base font-extrabold pt-3 pb-1" style={{ color: '#f0f2ff' }}>{t.slice(2)}</p>
 
-        // Markdown headings
-        if (trimmed.startsWith('### ')) {
-          return (
-            <p key={i} className="text-sm font-semibold pt-2 pb-0.5" style={{ color: '#f0f2ff' }}>
-              {trimmed.slice(4)}
-            </p>
-          )
-        }
-        if (trimmed.startsWith('## ')) {
-          return (
-            <p
-              key={i}
-              className="text-xs font-bold uppercase tracking-[0.15em] pt-3 pb-0.5"
-              style={{ color: accentColor }}
-            >
-              {trimmed.slice(3)}
-            </p>
-          )
-        }
-        if (trimmed.startsWith('# ')) {
-          return (
-            <p key={i} className="text-base font-extrabold pt-3 pb-1" style={{ color: '#f0f2ff' }}>
-              {trimmed.slice(2)}
-            </p>
-          )
-        }
-
-        // Bullet points
-        if (trimmed.startsWith('- ') || trimmed.startsWith('• ') || trimmed.startsWith('* ')) {
+        if (t.startsWith('- ') || t.startsWith('• ') || t.startsWith('* ')) {
           return (
             <div key={i} className="flex gap-2 ml-1 py-0.5">
-              <span className="text-xs mt-[3px] flex-shrink-0" style={{ color: accentColor }}>
-                ▸
-              </span>
-              <span className="text-sm leading-relaxed" style={{ color: '#8b90c0' }}>
-                {parseInlineBold(trimmed.slice(2))}
-              </span>
+              <span className="text-xs mt-[3px] flex-shrink-0" style={{ color: accentColor }}>▸</span>
+              <span className="text-sm leading-relaxed" style={{ color: '#8b90c0' }}>{parseInlineBold(t.slice(2))}</span>
             </div>
           )
         }
 
-        // Numbered list
-        const numMatch = trimmed.match(/^(\d+)\.\s(.+)/)
+        const numMatch = t.match(/^(\d+)\.\s(.+)/)
         if (numMatch) {
           return (
             <div key={i} className="flex gap-2 ml-1 py-0.5">
-              <span
-                className="text-xs mt-[3px] flex-shrink-0 font-bold w-5"
-                style={{ color: accentColor }}
-              >
-                {numMatch[1]}.
-              </span>
-              <span className="text-sm leading-relaxed" style={{ color: '#8b90c0' }}>
-                {parseInlineBold(numMatch[2])}
-              </span>
+              <span className="text-xs mt-[3px] flex-shrink-0 font-bold w-5" style={{ color: accentColor }}>{numMatch[1]}.</span>
+              <span className="text-sm leading-relaxed" style={{ color: '#8b90c0' }}>{parseInlineBold(numMatch[2])}</span>
             </div>
           )
         }
 
-        // Horizontal rule
-        if (/^[-—]{3,}$/.test(trimmed)) {
-          return (
-            <div
-              key={i}
-              className="my-3"
-              style={{ height: '1px', background: '#1a1c38' }}
-            />
-          )
+        if (/^[-—]{3,}$/.test(t)) {
+          return <div key={i} className="my-3" style={{ height: '1px', background: '#1e2248' }} />
         }
 
-        // Paragraph
         return (
           <p key={i} className="text-sm leading-relaxed" style={{ color: '#8b90c0' }}>
             {parseInlineBold(line)}
@@ -118,51 +65,83 @@ function FormattedOutput({ content, accentColor }) {
   )
 }
 
-export default function AgentOutputCard({ agent, state, isCurrentAgent, onApprove, onReject }) {
-  const isStreaming = state.status === 'streaming' || state.status === 'active'
+/* ── Copy button ─────────────────────────────────────────────── */
+function CopyButton({ content }) {
+  const [copied, setCopied] = useState(false)
+  function handleCopy() {
+    navigator.clipboard.writeText(content).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    })
+  }
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copiar al portapapeles"
+      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all duration-150"
+      style={{
+        background: copied ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${copied ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.07)'}`,
+        color: copied ? '#10b981' : 'rgba(255,255,255,0.3)',
+      }}
+    >
+      {copied ? <Check size={11} strokeWidth={2.5} /> : <Copy size={11} strokeWidth={2} />}
+      {copied ? 'Copiado' : 'Copiar'}
+    </button>
+  )
+}
+
+/* ── Card ────────────────────────────────────────────────────── */
+export default function AgentOutputCard({ agent, state, onApprove, onReject }) {
+  const isActive   = state.status === 'active'
+  const isStreaming = state.status === 'streaming'
   const isComplete = state.status === 'complete'
   const isApproved = state.status === 'approved'
-  const isError = state.status === 'error'
+  const isError    = state.status === 'error'
+  const isLive     = isActive || isStreaming
 
-  const borderColor = isApproved
-    ? 'rgba(16,185,129,0.3)'
-    : isStreaming || isComplete
-    ? `${agent.colorAlpha}0.35)`
-    : '#1a1c38'
-
-  const shadowColor = isApproved
-    ? 'rgba(16,185,129,0.07)'
-    : isStreaming
-    ? `${agent.colorAlpha}0.09)`
-    : 'transparent'
-
-  const topBarGradient = isApproved
-    ? 'linear-gradient(to right, transparent, rgba(16,185,129,0.6), transparent)'
-    : `linear-gradient(to right, transparent, ${agent.color}80, transparent)`
+  const accentColor = isApproved ? '#10b981' : agent.color
 
   return (
     <div
-      className="agent-card"
+      className="card-enter relative rounded-xl overflow-hidden"
       style={{
-        borderColor,
-        boxShadow: `0 0 40px ${shadowColor}`,
+        background: '#0d0e1e',
+        border: '1px solid rgba(255,255,255,0.06)',
+        boxShadow: isLive
+          ? `0 0 40px ${agent.colorAlpha}0.12)`
+          : isApproved
+          ? '0 0 24px rgba(16,185,129,0.07)'
+          : 'none',
+        transition: 'box-shadow 0.4s ease',
       }}
     >
-      {/* Top color bar */}
-      <div style={{ height: '2px', background: topBarGradient }} />
-
-      {/* Card header */}
+      {/* LEFT accent border */}
       <div
-        className="flex items-center justify-between px-6 py-4"
-        style={{ borderBottom: '1px solid #1a1c38' }}
+        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl transition-all duration-500"
+        style={{
+          background: isApproved
+            ? '#10b981'
+            : isLive
+            ? `linear-gradient(180deg, ${agent.color}, ${agent.colorAlpha}0.4))`
+            : isComplete
+            ? agent.color
+            : 'rgba(255,255,255,0.07)',
+        }}
+      />
+
+      {/* Header */}
+      <div
+        className="flex items-center justify-between pl-7 pr-5 py-4"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
       >
         <div className="flex items-center gap-3">
-          {/* Agent icon */}
+          {/* Icon badge */}
           <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-xl font-bold"
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-lg font-bold flex-shrink-0"
             style={{
-              background: `${agent.colorAlpha}0.08)`,
-              border: `1px solid ${agent.colorAlpha}0.3)`,
+              background: `${agent.colorAlpha}0.09)`,
+              border: `1px solid ${agent.colorAlpha}0.28)`,
               color: agent.color,
             }}
           >
@@ -170,157 +149,112 @@ export default function AgentOutputCard({ agent, state, isCurrentAgent, onApprov
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm" style={{ color: '#f0f2ff' }}>
-                {agent.name}
-              </h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm font-bold" style={{ color: '#f0f2ff' }}>{agent.name}</h3>
               <span
                 className="role-badge"
                 style={{
                   background: `${agent.colorAlpha}0.08)`,
-                  border: `1px solid ${agent.colorAlpha}0.25)`,
+                  border: `1px solid ${agent.colorAlpha}0.22)`,
                   color: agent.color,
                 }}
               >
                 {agent.role}
               </span>
             </div>
-            <p className="text-xs mt-0.5" style={{ color: '#3a3f60' }}>
-              {agent.description}
-            </p>
+            <p className="text-[10px] mt-0.5" style={{ color: '#3a3f60' }}>{agent.description}</p>
           </div>
         </div>
 
-        {/* Status indicator */}
+        {/* Status chip */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {isStreaming && (
-            <>
-              <div
-                className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ background: agent.color }}
-              />
-              <span className="text-xs" style={{ color: '#8b90c0' }}>
-                Generando...
-              </span>
-            </>
+          {(isActive || isStreaming) && (
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold" style={{ color: agent.color }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse inline-block" style={{ background: agent.color }} />
+              {isActive ? 'Iniciando…' : 'Generando…'}
+            </span>
           )}
           {isComplete && (
-            <>
-              <div
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: agent.color }}
-              />
-              <span className="text-xs" style={{ color: '#8b90c0' }}>
-                Listo para revisión
-              </span>
-            </>
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold" style={{ color: agent.color }}>
+              <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: agent.color }} />
+              Listo
+            </span>
           )}
           {isApproved && (
-            <>
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#10b981' }} />
-              <span className="text-xs" style={{ color: '#10b981' }}>
-                Aprobado
-              </span>
-            </>
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold" style={{ color: '#10b981' }}>
+              <Check size={11} strokeWidth={2.5} style={{ color: '#10b981' }} />
+              Aprobado
+            </span>
           )}
           {isError && (
-            <>
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#f43f5e' }} />
-              <span className="text-xs" style={{ color: '#f43f5e' }}>
-                Error
-              </span>
-            </>
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold" style={{ color: '#f43f5e' }}>
+              <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#f43f5e' }} />
+              Error
+            </span>
           )}
-          {state.status === 'active' && (
-            <>
-              <Loader
-                className="w-3.5 h-3.5 animate-spin"
-                style={{ color: agent.color }}
-              />
-              <span className="text-xs" style={{ color: '#8b90c0' }}>
-                Iniciando...
-              </span>
-            </>
-          )}
+          {/* Copy button when there's content */}
+          {state.content && <CopyButton content={state.content} />}
         </div>
       </div>
 
-      {/* Content area */}
-      <div className="px-6 py-5">
+      {/* Content */}
+      <div className="pl-7 pr-5 py-5">
         {isError && (
           <div
             className="flex items-start gap-3 p-4 rounded-lg mb-4"
-            style={{
-              background: 'rgba(244,63,94,0.06)',
-              border: '1px solid rgba(244,63,94,0.2)',
-            }}
+            style={{ background: 'rgba(244,63,94,0.06)', border: '1px solid rgba(244,63,94,0.18)' }}
           >
-            <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#f43f5e' }} />
+            <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" style={{ color: '#f43f5e' }} />
             <div>
-              <p className="text-xs font-semibold mb-1" style={{ color: '#f43f5e' }}>
-                Error al generar
-              </p>
-              <p className="text-xs" style={{ color: '#8b90c0' }}>
-                {state.error}
-              </p>
+              <p className="text-xs font-semibold mb-0.5" style={{ color: '#f43f5e' }}>Error al generar</p>
+              <p className="text-xs" style={{ color: '#8b90c0' }}>{state.error}</p>
             </div>
           </div>
         )}
 
         {state.content ? (
           <div
-            className={`stream-text max-h-[560px] overflow-y-auto pr-1 ${
-              isStreaming ? 'cursor-stream' : ''
-            }`}
+            className={`stream-text max-h-[560px] overflow-y-auto pr-2${isStreaming ? ' cursor-stream' : ''}`}
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#1e2248 transparent' }}
           >
             <FormattedOutput content={state.content} accentColor={agent.color} />
           </div>
         ) : !isError ? (
-          <div className="flex items-center gap-3 py-10 justify-center">
-            <Loader
-              className="w-5 h-5 animate-spin"
-              style={{ color: agent.color }}
-            />
-            <span className="text-sm" style={{ color: '#3a3f60' }}>
-              Analizando...
-            </span>
+          <div className="flex items-center gap-3 py-12 justify-center">
+            <Loader size={18} className="animate-spin" style={{ color: agent.color }} />
+            <span className="text-sm" style={{ color: '#3a3f60' }}>Analizando…</span>
           </div>
         ) : null}
       </div>
 
-      {/* Action footer — only when complete and awaiting approval */}
+      {/* Action footer — approval buttons */}
       {isComplete && (
         <div
-          className="flex items-center justify-between px-6 py-4"
-          style={{ borderTop: '1px solid #1a1c38', background: 'rgba(17,19,40,0.5)' }}
+          className="flex items-center justify-between pl-7 pr-5 py-4"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.15)' }}
         >
-          <p className="text-xs" style={{ color: '#3a3f60' }}>
-            ¿Aprobás este output y continuás al siguiente agente?
-          </p>
+          <p className="text-[10px] text-white/25">¿Aprobás este output?</p>
           <div className="flex items-center gap-2">
-            <button onClick={onReject} className="btn-regen">
-              <RefreshCw className="w-3 h-3" />
-              Regenerar
+            <button onClick={onReject} className="btn-redir">
+              <RotateCcw size={12} strokeWidth={2} />
+              Redirigir
             </button>
             <button onClick={onApprove} className="btn-approve">
-              <Check className="w-3.5 h-3.5" />
+              <Check size={13} strokeWidth={2.5} />
               Aprobar
             </button>
           </div>
         </div>
       )}
 
-      {/* Approved confirmation bar */}
+      {/* Approved bar */}
       {isApproved && (
         <div
-          className="flex items-center gap-2 px-6 py-3"
-          style={{
-            borderTop: '1px solid rgba(16,185,129,0.15)',
-            background: 'rgba(16,185,129,0.04)',
-          }}
+          className="flex items-center gap-2 pl-7 pr-5 py-3"
+          style={{ borderTop: '1px solid rgba(16,185,129,0.12)', background: 'rgba(16,185,129,0.04)' }}
         >
-          <CheckCircle className="w-3.5 h-3.5" style={{ color: '#10b981' }} />
-          <span className="text-xs font-semibold" style={{ color: '#10b981' }}>
+          <CheckCircle size={13} style={{ color: '#10b981' }} />
+          <span className="text-[10px] font-semibold" style={{ color: '#10b981' }}>
             Output aprobado — incluido en el contexto del siguiente agente
           </span>
         </div>
@@ -329,11 +263,11 @@ export default function AgentOutputCard({ agent, state, isCurrentAgent, onApprov
       {/* Error retry */}
       {isError && (
         <div
-          className="flex items-center justify-end gap-2 px-6 py-4"
-          style={{ borderTop: '1px solid #1a1c38' }}
+          className="flex items-center justify-end gap-2 pl-7 pr-5 py-4"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
         >
-          <button onClick={onReject} className="btn-regen">
-            <RefreshCw className="w-3 h-3" />
+          <button onClick={onReject} className="btn-redir">
+            <RotateCcw size={12} strokeWidth={2} />
             Reintentar
           </button>
         </div>
