@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Key, RotateCcw, Zap } from 'lucide-react'
+import { Key, RotateCcw, Zap, BarChart2 } from 'lucide-react'
 
 /* ── Count-up ─────────────────────────────────────────── */
 function useCountUp(target, duration = 900, startDelay = 400) {
@@ -39,7 +39,7 @@ function Metric({ label, value, prefix = '', decimals = 0, color }) {
 }
 
 /* ── Header ───────────────────────────────────────────── */
-export default function Header({ apiKey, onOpenApiModal, onReset, totalCampaigns = 0, totalCost = 0, validatedProducts = 0 }) {
+export default function Header({ apiKey, metaToken, onOpenApiModal, onReset, totalCampaigns = 0, totalCost = 0, validatedProducts = 0 }) {
   return (
     <header
       className="glass-dark fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6"
@@ -79,6 +79,25 @@ export default function Header({ apiKey, onOpenApiModal, onReset, totalCampaigns
 
       {/* Actions */}
       <div className="flex items-center gap-2">
+        {/* Meta Ads badge */}
+        <button
+          onClick={onOpenApiModal}
+          title={metaToken ? 'Meta Ads Library conectada' : 'Conectar Meta Ads Library (opcional)'}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200"
+          style={{
+            background: metaToken ? 'rgba(24,119,242,0.08)' : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${metaToken ? 'rgba(24,119,242,0.3)' : 'rgba(255,255,255,0.07)'}`,
+            color: metaToken ? '#60a5fa' : 'rgba(255,255,255,0.25)',
+          }}
+        >
+          <BarChart2 size={12} strokeWidth={2} />
+          {metaToken ? 'Meta Ads' : 'Meta Ads'}
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ background: metaToken ? '#60a5fa' : 'rgba(255,255,255,0.15)' }}
+          />
+        </button>
+
         <button
           onClick={onOpenApiModal}
           className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200"

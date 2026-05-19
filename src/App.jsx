@@ -150,7 +150,8 @@ function EmptyHero() {
 
 /* ─── App ─────────────────────────────────────────────── */
 export default function App() {
-  const [apiKey, setApiKey]     = useState(() => localStorage.getItem('acm_api_key') || '')
+  const [apiKey,    setApiKey]    = useState(() => localStorage.getItem('acm_api_key')    || '')
+  const [metaToken, setMetaToken] = useState(() => localStorage.getItem('meta_ads_token') || '')
   const [showModal, setShowModal] = useState(() => !localStorage.getItem('acm_api_key'))
 
   const {
@@ -184,14 +185,19 @@ export default function App() {
   }, [workflowStarted])
 
   /* ── Handlers ──────────────────────────────────────── */
-  const handleSave = key => {
+  const handleSave = (key, newMetaToken) => {
     setApiKey(key)
     localStorage.setItem('acm_api_key', key)
+    // Only overwrite the meta token if the user typed a new one
+    if (newMetaToken) {
+      localStorage.setItem('meta_ads_token', newMetaToken)
+      setMetaToken(newMetaToken)
+    }
     setShowModal(false)
   }
   const handleStart = () => {
     if (!apiKey) { setShowModal(true); return }
-    startWorkflow(product, apiKey)
+    startWorkflow(product, apiKey, metaToken)
   }
   const handleApprove = index => {
     if (approveRef.current) return
@@ -230,6 +236,7 @@ export default function App() {
       {/* ── Fixed Header ── */}
       <Header
         apiKey={apiKey}
+        metaToken={metaToken}
         onOpenApiModal={() => setShowModal(true)}
         onReset={handleReset}
         totalCampaigns={totalCampaigns}
@@ -333,6 +340,7 @@ export default function App() {
           onSave={handleSave}
           onClose={() => setShowModal(false)}
           hasKey={!!apiKey}
+          hasMetaToken={!!metaToken}
         />
       )}
     </div>
