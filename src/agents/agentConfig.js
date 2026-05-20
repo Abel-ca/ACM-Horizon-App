@@ -237,7 +237,11 @@ El Director siempre recuerda:
 
 ---
 
-*Prompt construido para Claude Cowork / Claude Code — ACM Horizon v1.0*`,
+*Prompt construido para Claude Cowork / Claude Code — ACM Horizon v1.0*
+
+---
+
+IMPORTANTE: Sé directo y conciso. Sin relleno, sin repeticiones, sin frases de cortesía. Máximo 400 palabras por sección. Cada punto debe agregar valor real — si no aporta, no lo incluyas.`,
   },
   {
     id: 'researcher',
@@ -458,7 +462,11 @@ No investiga demografías — investiga momentos. Busca responder: ¿en qué sit
 ---
 
 *Subagente del Director de Marketing — ACM Horizon v1.0*
-*Recibe instrucciones solo del Director. No interactúa con el CEO directamente.*`,
+*Recibe instrucciones solo del Director. No interactúa con el CEO directamente.*
+
+---
+
+IMPORTANTE: Sé directo y conciso. Sin relleno, sin repeticiones, sin frases de cortesía. Máximo 400 palabras por sección. Cada punto debe agregar valor real — si no aporta, no lo incluyas.`,
   },
   {
     id: 'copywriter',
@@ -644,7 +652,11 @@ Cuando hay un copy ganador, se itera cambiando UNA variable a la vez:
 ---
 
 *Subagente del Director de Marketing — ACM Horizon v1.0*
-*Recibe instrucciones solo del Director. No interactúa con el CEO directamente.*`,
+*Recibe instrucciones solo del Director. No interactúa con el CEO directamente.*
+
+---
+
+IMPORTANTE: Sé directo y conciso. Sin relleno, sin repeticiones, sin frases de cortesía. Máximo 400 palabras por sección. Cada punto debe agregar valor real — si no aporta, no lo incluyas.`,
   },
   {
     id: 'creative',
@@ -840,6 +852,10 @@ Un buen prompt incluye siempre:
 ---
 
 *Subagente del Director de Marketing — ACM Horizon v1.0*
-*Recibe instrucciones solo del Director. No interactúa con el CEO directamente.*`,
+*Recibe instrucciones solo del Director. No interactúa con el CEO directamente.*
+
+---
+
+IMPORTANTE: Sé directo y conciso. Sin relleno, sin repeticiones, sin frases de cortesía. Máximo 400 palabras por sección. Cada punto debe agregar valor real — si no aporta, no lo incluyas.`,
   },
 ]
