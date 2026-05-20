@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Check, RotateCcw, CheckCircle, AlertTriangle, Copy } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Check, RotateCcw, CheckCircle, AlertTriangle, Copy, Maximize2, X } from 'lucide-react'
 import { getTheme } from '../design/agentTheme'
 
 /* ── Inline bold parser ──────────────────────────────── */
@@ -107,16 +107,158 @@ function CopyBtn({ content }) {
   )
 }
 
+/* ── Full output modal ────────────────────────────────── */
+function FullOutputModal({ agent, state, onClose }) {
+  const theme = getTheme(agent.id)
+
+  /* Cerrar con Escape */
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 200,
+        background: 'rgba(0,0,0,0.76)',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '24px 16px',
+      }}
+    >
+      {/* Card — detener propagación para no cerrar al hacer clic dentro */}
+      <div
+        onClick={e => e.stopPropagation()}
+        className="panel-enter"
+        style={{
+          width: '100%', maxWidth: 760,
+          maxHeight: '88vh',
+          display: 'flex', flexDirection: 'column',
+          background: 'rgba(22,26,51,0.96)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(184,195,255,0.12)',
+          borderTop: `3px solid ${theme.color}`,
+          borderRadius: 20,
+          overflow: 'hidden',
+          boxShadow: `0 32px 80px rgba(0,0,0,0.55), 0 0 60px ${theme.glow}0.10)`,
+        }}
+      >
+        {/* Modal header */}
+        <div
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '16px 24px',
+            borderBottom: '1px solid rgba(184,195,255,0.07)',
+            background: 'rgba(22,26,51,0.40)',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 12,
+              background: theme.bg, border: `1px solid ${theme.border}`,
+              color: theme.color, fontSize: 20, lineHeight: 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {agent.icon}
+            </div>
+            <div>
+              <h3 style={{
+                color: '#dee0ff', fontFamily: 'Sora, sans-serif',
+                fontSize: 14, fontWeight: 700, lineHeight: 1.2,
+              }}>
+                {agent.name}
+              </h3>
+              <p style={{
+                color: '#434656', fontSize: 9.5,
+                fontFamily: 'JetBrains Mono, monospace',
+                letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 2,
+              }}>
+                Output completo
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {state.content && <CopyBtn content={state.content} />}
+            <button
+              onClick={onClose}
+              style={{
+                width: 32, height: 32, borderRadius: 8,
+                background: 'rgba(184,195,255,0.05)',
+                border: '1px solid rgba(184,195,255,0.10)',
+                color: '#8e90a2',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,180,171,0.08)'
+                e.currentTarget.style.borderColor = 'rgba(255,180,171,0.25)'
+                e.currentTarget.style.color = '#ffb4ab'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(184,195,255,0.05)'
+                e.currentTarget.style.borderColor = 'rgba(184,195,255,0.10)'
+                e.currentTarget.style.color = '#8e90a2'
+              }}
+            >
+              <X size={14} strokeWidth={2} />
+            </button>
+          </div>
+        </div>
+
+        {/* Modal body — scroll libre */}
+        <div
+          style={{
+            flex: 1, overflowY: 'auto',
+            padding: '24px 28px 32px',
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(184,195,255,0.12) transparent',
+          }}
+        >
+          {state.content ? (
+            <FormattedOutput content={state.content} accentColor={theme.color} />
+          ) : (
+            <Skeleton />
+          )}
+        </div>
+
+        {/* Modal footer — ESC hint */}
+        <div style={{
+          flexShrink: 0,
+          padding: '10px 24px',
+          borderTop: '1px solid rgba(184,195,255,0.06)',
+          display: 'flex', justifyContent: 'flex-end',
+        }}>
+          <span style={{
+            color: '#434656', fontSize: 10,
+            fontFamily: 'JetBrains Mono, monospace',
+            letterSpacing: '0.06em',
+          }}>
+            ESC o clic fuera para cerrar
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ── Agent Panel — single full-height view ───────────── */
 export default function AgentOutputCard({ agent, state, onApprove, onReject, style = {} }) {
   const theme = getTheme(agent.id)
+  const [showFullModal, setShowFullModal] = useState(false)
 
-  const isActive   = state.status === 'active'
+  const isActive    = state.status === 'active'
   const isStreaming = state.status === 'streaming'
-  const isComplete = state.status === 'complete'
-  const isApproved = state.status === 'approved'
-  const isError    = state.status === 'error'
-  const isLive     = isActive || isStreaming
+  const isComplete  = state.status === 'complete'
+  const isApproved  = state.status === 'approved'
+  const isError     = state.status === 'error'
+  const isLive      = isActive || isStreaming
   const showSkeleton = isLive && !state.content
 
   return (
@@ -210,14 +352,43 @@ export default function AgentOutputCard({ agent, state, onApprove, onReject, sty
               </span>
             )}
             {state.content && <CopyBtn content={state.content} />}
+            {state.content && (
+              <button
+                onClick={() => setShowFullModal(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all duration-150"
+                style={{
+                  background: 'rgba(184,195,255,0.04)',
+                  border: '1px solid rgba(184,195,255,0.10)',
+                  color: 'rgba(184,195,255,0.45)',
+                  fontFamily: 'JetBrains Mono, monospace',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = `${theme.bg}`
+                  e.currentTarget.style.borderColor = theme.border
+                  e.currentTarget.style.color = theme.color
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(184,195,255,0.04)'
+                  e.currentTarget.style.borderColor = 'rgba(184,195,255,0.10)'
+                  e.currentTarget.style.color = 'rgba(184,195,255,0.45)'
+                }}
+              >
+                <Maximize2 size={11} strokeWidth={1.8} /> Ver completo
+              </button>
+            )}
           </div>
         </div>
 
-        {/* ── Scrollable content area ── */}
-        <div
-          className="flex-1 overflow-y-auto px-7 py-5"
-          style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(184,195,255,0.10) transparent' }}
-        >
+        {/* ── Content area — scroll interno, máx 400px ── */}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <div
+            className="overflow-y-auto px-7 py-5"
+            style={{
+              maxHeight: 400,
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(184,195,255,0.10) transparent',
+            }}
+          >
           {isError && (
             <div className="flex items-start gap-3 p-4 rounded-xl mb-4"
                  style={{
@@ -234,15 +405,27 @@ export default function AgentOutputCard({ agent, state, onApprove, onReject, sty
             </div>
           )}
 
-          {showSkeleton ? (
-            <Skeleton />
-          ) : state.content ? (
-            <div className={`stream-text${isStreaming ? ' stream-cursor' : ''}`}>
-              <FormattedOutput content={state.content} accentColor={theme.color} />
-            </div>
-          ) : !isError ? (
-            <Skeleton />
-          ) : null}
+            {showSkeleton ? (
+              <Skeleton />
+            ) : state.content ? (
+              <div className={`stream-text${isStreaming ? ' stream-cursor' : ''}`}>
+                <FormattedOutput content={state.content} accentColor={theme.color} />
+              </div>
+            ) : !isError ? (
+              <Skeleton />
+            ) : null}
+          </div>
+
+          {/* Fade gradient — indica que hay más contenido debajo */}
+          {state.content && (
+            <div
+              style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0, height: 52,
+                background: 'linear-gradient(transparent, rgba(13,17,42,0.82))',
+                pointerEvents: 'none',
+              }}
+            />
+          )}
         </div>
 
         {/* ── Sticky footer ── */}
@@ -290,6 +473,15 @@ export default function AgentOutputCard({ agent, state, onApprove, onReject, sty
           </div>
         )}
       </div>
+
+      {/* ── Modal "Ver completo" ── */}
+      {showFullModal && (
+        <FullOutputModal
+          agent={agent}
+          state={state}
+          onClose={() => setShowFullModal(false)}
+        />
+      )}
     </div>
   )
 }
