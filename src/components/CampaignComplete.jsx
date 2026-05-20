@@ -70,7 +70,7 @@ export default function CampaignComplete({ onReset, onExport }) {
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(245,158,11,0.45)' }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(245,158,11,0.3)' }}
               >
-                <Download size={14} strokeWidth={2.5} /> Exportar PDF
+                <Download size={14} strokeWidth={2.5} /> Descargar campaña completa
               </button>
             )}
             <button

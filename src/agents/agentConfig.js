@@ -298,6 +298,12 @@ Consultas: "[producto] reviews opiniones compradores" / "[producto] vale la pena
 Consultas: "[producto] dropshipping saturado latinoamérica" / "[producto] competencia Ecuador Colombia"
 → Evalúa si la ventana de oportunidad está abierta o el mercado está sobreexplotado.
 
+**Búsqueda 7 — Tendencia en Google Trends**
+Busca el volumen de búsqueda y dirección de la tendencia del producto en los 4 países objetivo.
+Consultas: "google trends [producto] Ecuador Colombia México Perú" / "[producto] tendencia búsquedas 2025 latinoamérica" / "site:trends.google.com [producto]"
+→ Determina si la tendencia es **CRECIENTE** (ventana de entrada ideal), **ESTABLE** (mercado maduro, diferenciación necesaria) o **CAYENDO** (señal de salida o nicho en declive).
+→ Una tendencia creciente simultánea en 2 o más países = oportunidad regional confirmada. Incluye este diagnóstico explícitamente en tu output como "TENDENCIA GOOGLE: [CRECIENTE / ESTABLE / CAYENDO] — [razón]".
+
 **Reporta explícitamente** los hallazgos de cada búsqueda en tu output, indicando qué encontraste, en qué plataforma y cómo impacta el análisis. Si una búsqueda no devuelve resultados útiles, indícalo y explica qué implica (sin datos = posible novedad o nicho sin validar).
 
 ---

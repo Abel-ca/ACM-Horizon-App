@@ -1,43 +1,63 @@
-import { Clock, CheckCircle2 } from 'lucide-react'
+import { Clock, CheckCircle2, Eye } from 'lucide-react'
 import { useState } from 'react'
 
-const MOCK = [
-  { id: 'm1', product: 'Masajeador cervical eléctrico', date: '14 may', estimatedCost: 0.041 },
-  { id: 'm2', product: 'Fajas reductoras térmicas',    date: '12 may', estimatedCost: 0.038 },
-  { id: 'm3', product: 'Pulsera de amatista premium',  date: '10 may', estimatedCost: 0.044 },
-  { id: 'm4', product: 'Colágeno marino hidrolizado',  date: '8 may',  estimatedCost: 0.039 },
-  { id: 'm5', product: 'Cargador solar portátil 20W',  date: '6 may',  estimatedCost: 0.036 },
-]
+const ACCENT = '#6366f1'
 
-const ACCENT = '#6366f1' // Primary indigo accent for sidebar hover
-
-function SidebarItem({ campaign, isEmpty }) {
+/* ── Campaign list item ─────────────────────────────────── */
+function SidebarItem({ campaign, onView }) {
   const [hovered, setHovered] = useState(false)
+
   return (
     <div
-      className="relative px-3 py-2.5 rounded-xl cursor-default transition-all duration-150"
+      className="relative px-3 py-2.5 rounded-xl transition-all duration-150"
       style={{
         background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent',
         borderLeft: `2px solid ${hovered ? ACCENT : 'transparent'}`,
-        opacity: isEmpty ? 0.45 : 1,
         paddingLeft: hovered ? 10 : 12,
+        cursor: 'default',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <p className="text-[11px] font-semibold leading-snug mb-1" style={{ color: '#c0c8e0' }}>
+      <p className="text-[11px] font-semibold leading-snug mb-1.5" style={{ color: '#c0c8e0' }}>
         {campaign.product}
       </p>
-      <div className="flex items-center justify-between">
-        <span className="flex items-center gap-1 text-[8px] font-bold uppercase tracking-widest" style={{ color: '#10b981' }}>
+      <div className="flex items-center justify-between gap-1">
+        <span className="flex items-center gap-1 text-[8px] font-bold uppercase tracking-widest flex-shrink-0"
+              style={{ color: '#10b981' }}>
           <CheckCircle2 size={8} /> OK
         </span>
-        <div className="flex items-center gap-2">
-          <span className="text-[8px]" style={{ color: 'rgba(255,255,255,0.2)' }}>{campaign.date}</span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[8px] truncate" style={{ color: 'rgba(255,255,255,0.2)' }}>
+            {campaign.dateShort ?? campaign.date}
+          </span>
           {campaign.estimatedCost != null && (
-            <span className="text-[8px] font-mono" style={{ color: 'rgba(255,255,255,0.15)' }}>
+            <span className="text-[8px] font-mono flex-shrink-0" style={{ color: 'rgba(255,255,255,0.15)' }}>
               ${campaign.estimatedCost.toFixed(3)}
             </span>
+          )}
+          {/* View button — only shown when campaign has stored outputs */}
+          {campaign.outputs && (
+            <button
+              onClick={() => onView(campaign)}
+              title="Ver campaña completa"
+              className="flex-shrink-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[8px] font-semibold transition-all duration-150"
+              style={{
+                background: 'rgba(99,102,241,0.08)',
+                border: '1px solid rgba(99,102,241,0.2)',
+                color: '#818cf8',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(99,102,241,0.18)'
+                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.45)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(99,102,241,0.08)'
+                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'
+              }}
+            >
+              <Eye size={8} /> Ver
+            </button>
           )}
         </div>
       </div>
@@ -45,7 +65,7 @@ function SidebarItem({ campaign, isEmpty }) {
   )
 }
 
-/* ── Empty state illustration ── */
+/* ── Empty state ────────────────────────────────────────── */
 function SidebarEmpty() {
   return (
     <div className="flex flex-col items-center px-4 py-8 text-center">
@@ -71,68 +91,117 @@ function SidebarEmpty() {
   )
 }
 
-export default function Sidebar({ campaigns, onNewCampaign }) {
+/* ── Sidebar ────────────────────────────────────────────── */
+export default function Sidebar({ campaigns, onNewCampaign, onViewCampaign, isOpen, onClose, isMobile }) {
   const isEmpty = campaigns.length === 0
-  const list    = isEmpty ? MOCK : campaigns
+
+  const sidebarStyle = isMobile
+    ? {
+        position: 'fixed',
+        top: 0,
+        left: isOpen ? 0 : -260,
+        bottom: 0,
+        zIndex: 60,
+        width: 260,
+        transition: 'left 0.3s cubic-bezier(0.4,0,0.2,1)',
+      }
+    : {
+        position: 'fixed',
+        top: 64,
+        left: 0,
+        bottom: 0,
+        zIndex: 40,
+        width: 220,
+      }
 
   return (
-    <aside
-      className="fixed top-16 left-0 bottom-0 z-40 flex flex-col"
-      style={{
-        width: 220,
-        background: 'rgba(8,10,15,0.95)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      {/* New campaign button */}
-      <div className="p-4">
-        <button
-          onClick={onNewCampaign}
-          className="w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all duration-200"
-          style={{
-            background: 'rgba(99,102,241,0.08)',
-            border: '1px solid rgba(99,102,241,0.22)',
-            color: '#6366f1',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(99,102,241,0.15)'
-            e.currentTarget.style.borderColor = 'rgba(99,102,241,0.45)'
-            e.currentTarget.style.boxShadow = '0 0 18px rgba(99,102,241,0.12)'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(99,102,241,0.08)'
-            e.currentTarget.style.borderColor = 'rgba(99,102,241,0.22)'
-            e.currentTarget.style.boxShadow = 'none'
-          }}
-        >
-          + Nueva Campaña
-        </button>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {isMobile && isOpen && (
+        <div
+          className="fixed inset-0 z-50"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={onClose}
+        />
+      )}
 
-      {/* Section label */}
-      <div className="px-4 pb-2 flex items-center justify-between">
-        <span className="text-[8px] font-extrabold uppercase tracking-[0.28em] flex items-center gap-1.5"
-              style={{ color: 'rgba(255,255,255,0.2)' }}>
-          <Clock size={8} />
-          {isEmpty ? 'Ejemplo' : 'Historial'}
-        </span>
-        {!isEmpty && (
-          <span className="text-[8px] font-bold" style={{ color: 'rgba(255,255,255,0.18)' }}>
-            {campaigns.length}
+      <aside
+        className="flex flex-col"
+        style={{
+          ...sidebarStyle,
+          background: 'rgba(8,10,15,0.97)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        {/* Mobile close handle */}
+        {isMobile && (
+          <div className="flex items-center justify-between px-4 pt-4 pb-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>Historial</span>
+            <button
+              onClick={onClose}
+              className="w-7 h-7 flex items-center justify-center rounded-lg"
+              style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* New campaign button */}
+        <div className="p-4">
+          <button
+            onClick={() => { onNewCampaign(); onClose?.() }}
+            className="w-full py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all duration-200"
+            style={{
+              background: 'rgba(99,102,241,0.08)',
+              border: '1px solid rgba(99,102,241,0.22)',
+              color: '#6366f1',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(99,102,241,0.15)'
+              e.currentTarget.style.borderColor = 'rgba(99,102,241,0.45)'
+              e.currentTarget.style.boxShadow = '0 0 18px rgba(99,102,241,0.12)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(99,102,241,0.08)'
+              e.currentTarget.style.borderColor = 'rgba(99,102,241,0.22)'
+              e.currentTarget.style.boxShadow = 'none'
+            }}
+          >
+            + Nueva Campaña
+          </button>
+        </div>
+
+        {/* Section label */}
+        <div className="px-4 pb-2 flex items-center justify-between">
+          <span className="text-[8px] font-extrabold uppercase tracking-[0.28em] flex items-center gap-1.5"
+                style={{ color: 'rgba(255,255,255,0.2)' }}>
+            <Clock size={8} />
+            Historial
           </span>
-        )}
-      </div>
+          {!isEmpty && (
+            <span className="text-[8px] font-bold" style={{ color: 'rgba(255,255,255,0.18)' }}>
+              {campaigns.length}
+            </span>
+          )}
+        </div>
 
-      {/* Campaign list or empty */}
-      <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-0.5" style={{ scrollbarWidth: 'none' }}>
-        {isEmpty ? (
-          <SidebarEmpty />
-        ) : (
-          list.map(c => <SidebarItem key={c.id} campaign={c} isEmpty={false} />)
-        )}
-      </div>
-    </aside>
+        {/* List */}
+        <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-0.5" style={{ scrollbarWidth: 'none' }}>
+          {isEmpty
+            ? <SidebarEmpty />
+            : campaigns.map(c => (
+                <SidebarItem
+                  key={c.id}
+                  campaign={c}
+                  onView={camp => { onViewCampaign(camp); onClose?.() }}
+                />
+              ))
+          }
+        </div>
+      </aside>
+    </>
   )
 }

@@ -7,16 +7,19 @@ import ProductInput     from './components/ProductInput'
 import PipelineProgress from './components/PipelineProgress'
 import AgentOutputCard  from './components/AgentOutputCard'
 import CampaignComplete from './components/CampaignComplete'
+import CampaignViewer   from './components/CampaignViewer'
 import { useWorkflow }        from './hooks/useWorkflow'
 import { useCampaignHistory } from './hooks/useCampaignHistory'
+import { useIsMobile }        from './hooks/useIsMobile'
+import { downloadPdf }        from './lib/pdfExport'
 import { AGENTS } from './agents/agentConfig'
 import { PALETTE } from './design/agentTheme'
 
 /* ─── Dimensions ─────────────────────────────────────── */
-const HEADER_H  = 64
-const PIPELINE_H = 104
-const SIDEBAR_W  = 220
-const TOTAL_TOP  = HEADER_H + PIPELINE_H
+const HEADER_H       = 64
+const PIPELINE_H     = 104   // desktop
+const PIPELINE_H_MOB = 220   // mobile 2×2 grid
+const SIDEBAR_W      = 220
 
 /* ─── Confetti ───────────────────────────────────────── */
 const FALL_VARIANTS = ['confettiFallA', 'confettiFallB', 'confettiFallC']
@@ -53,41 +56,6 @@ function Confetti() {
       ))}
     </div>
   )
-}
-
-/* ─── PDF export helper ───────────────────────────────── */
-const AGENT_META = {
-  director:   { name: 'Director de Marketing',     color: '#6366f1' },
-  researcher: { name: 'Investigador de Productos', color: '#06b6d4' },
-  copywriter: { name: 'Copywriter de Conversión',  color: '#8b5cf6' },
-  creative:   { name: 'Director Creativo Visual',  color: '#ec4899' },
-}
-
-function openPdf(product, agentStates) {
-  const sections = Object.entries(agentStates)
-    .filter(([, s]) => s.status === 'approved' && s.content)
-    .map(([id, s]) => {
-      const m = AGENT_META[id] || { name: id, color: '#888' }
-      const esc = s.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      return `<section style="margin-bottom:48px">
-        <h2 style="font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:${m.color};border-bottom:1px solid ${m.color}33;padding-bottom:8px;margin-bottom:18px">${m.name}</h2>
-        <pre style="font-family:monospace;font-size:11px;line-height:1.9;white-space:pre-wrap;word-break:break-word;color:#222">${esc}</pre>
-      </section>`
-    }).join('')
-  const now = new Date().toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' })
-  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>ACM Horizon — ${product}</title>
-  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#111;padding:48px;max-width:860px;margin:0 auto}
-  @media print{body{padding:24px}.no-print{display:none}}.cover{margin-bottom:48px;padding-bottom:28px;border-bottom:3px solid #6366f1}
-  .label{font-size:10px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#6366f1;margin-bottom:10px}.title{font-size:28px;font-weight:800;color:#080a0f;margin-bottom:6px}
-  .meta{font-size:11px;color:#666}.btn{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 22px;background:#6366f1;color:#fff;font-weight:800;font-size:12px;letter-spacing:.15em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer}
-  </style></head><body>
-  <div class="cover"><p class="label">ACM Horizon · Brief de Campaña</p><h1 class="title">${product}</h1><p class="meta">Generado el ${now}</p>
-  <button class="btn no-print" onclick="window.print()">⬇ Exportar PDF</button></div>${sections}</body></html>`
-  const w = window.open('', '_blank', 'width=920,height=720')
-  if (!w) return
-  w.document.write(html)
-  w.document.close()
-  setTimeout(() => w.print(), 800)
 }
 
 /* ─── Empty state ─────────────────────────────────────── */
@@ -150,8 +118,12 @@ function EmptyHero() {
 
 /* ─── App ─────────────────────────────────────────────── */
 export default function App() {
+  const isMobile = useIsMobile()
+
   const [apiKey,    setApiKey]    = useState(() => localStorage.getItem('acm_api_key') || '')
   const [showModal, setShowModal] = useState(() => !localStorage.getItem('acm_api_key'))
+  const [sidebarOpen,      setSidebarOpen]      = useState(false)
+  const [viewingCampaign,  setViewingCampaign]  = useState(null)
 
   const {
     product, setProduct,
@@ -183,6 +155,12 @@ export default function App() {
     if (!workflowStarted) confettiShown.current = false
   }, [workflowStarted])
 
+  /* Derived layout values */
+  const effectiveSidebarW = isMobile ? 0 : SIDEBAR_W
+  const pipelineH         = isMobile ? PIPELINE_H_MOB : PIPELINE_H
+  const totalTop          = HEADER_H + pipelineH
+  const showPipeline      = workflowStarted && !viewingCampaign
+
   /* ── Handlers ──────────────────────────────────────── */
   const handleSave = key => {
     setApiKey(key)
@@ -206,10 +184,11 @@ export default function App() {
   }
   const handleReset = () => {
     confettiShown.current = false
+    setViewingCampaign(null)
     reset()
   }
 
-  /* ── Displayed agent — the first non-pending, non-approved one ── */
+  /* ── Displayed agent — first active/streaming/complete/error ── */
   const displayed = (() => {
     if (!workflowStarted) return null
     for (let i = 0; i < AGENTS.length; i++) {
@@ -232,23 +211,32 @@ export default function App() {
         apiKey={apiKey}
         onOpenApiModal={() => setShowModal(true)}
         onReset={handleReset}
+        onOpenSidebar={() => setSidebarOpen(true)}
         totalCampaigns={totalCampaigns}
         totalCost={totalCost}
         validatedProducts={validatedProducts}
+        isMobile={isMobile}
       />
 
       {/* ── Fixed Sidebar ── */}
-      <Sidebar campaigns={campaigns} onNewCampaign={handleReset} />
+      <Sidebar
+        campaigns={campaigns}
+        onNewCampaign={handleReset}
+        onViewCampaign={c => { setViewingCampaign(c); setSidebarOpen(false) }}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isMobile={isMobile}
+      />
 
-      {/* ── Fixed Pipeline Bar ── */}
-      {workflowStarted && (
+      {/* ── Fixed Pipeline Bar — hidden when viewing a campaign ── */}
+      {showPipeline && (
         <div
           style={{
             position: 'fixed',
             top: HEADER_H,
-            left: SIDEBAR_W,
+            left: effectiveSidebarW,
             right: 0,
-            height: PIPELINE_H,
+            height: pipelineH,
             zIndex: 35,
             background: 'rgba(8,10,15,0.9)',
             backdropFilter: 'blur(20px)',
@@ -256,31 +244,43 @@ export default function App() {
             borderBottom: '1px solid rgba(255,255,255,0.05)',
             display: 'flex',
             alignItems: 'center',
-            padding: '0 40px',
+            padding: isMobile ? '0 12px' : '0 40px',
           }}
         >
-          <PipelineProgress agentStates={agentStates} campaignComplete={campaignComplete} />
+          <PipelineProgress
+            agentStates={agentStates}
+            campaignComplete={campaignComplete}
+            isMobile={isMobile}
+          />
         </div>
       )}
 
-      {/* ── Main content area — fixed, fills remaining space ── */}
+      {/* ── Main content area ── */}
       <div
         style={{
           position: 'fixed',
-          top: workflowStarted ? TOTAL_TOP : HEADER_H,
-          left: SIDEBAR_W,
+          top: showPipeline ? totalTop : HEADER_H,
+          left: effectiveSidebarW,
           right: 0,
           bottom: 0,
           overflow: 'hidden',
           zIndex: 10,
-          transition: 'top 0.3s ease',
+          transition: 'top 0.3s ease, left 0.3s ease',
         }}
       >
 
-        {/* NOT started: hero + empty state */}
-        {!workflowStarted && (
+        {/* Campaign history viewer */}
+        {viewingCampaign && (
+          <CampaignViewer
+            campaign={viewingCampaign}
+            onBack={() => setViewingCampaign(null)}
+          />
+        )}
+
+        {/* Hero / empty state */}
+        {!viewingCampaign && !workflowStarted && (
           <div style={{ height: '100%', overflowY: 'auto' }}>
-            <div style={{ maxWidth: 680, margin: '0 auto', padding: '52px 40px 80px' }}>
+            <div style={{ maxWidth: 680, margin: '0 auto', padding: isMobile ? '32px 20px 80px' : '52px 40px 80px' }}>
               <ProductInput
                 product={product}
                 setProduct={setProduct}
@@ -293,22 +293,22 @@ export default function App() {
         )}
 
         {/* Campaign complete screen */}
-        {workflowStarted && campaignComplete && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '24px 32px' }}>
+        {!viewingCampaign && workflowStarted && campaignComplete && (
+          <div style={{ height: '100%', overflowY: 'auto', padding: isMobile ? '16px' : '24px 32px' }}>
             <CampaignComplete
               onReset={handleReset}
-              onExport={() => openPdf(product, agentStates)}
+              onExport={() => downloadPdf(product, agentStates)}
             />
           </div>
         )}
 
         {/* Single agent panel */}
-        {workflowStarted && !campaignComplete && displayed && (
+        {!viewingCampaign && workflowStarted && !campaignComplete && displayed && (
           <div
             key={displayed.agent.id}
             style={{
               height: '100%',
-              padding: '20px 32px 20px',
+              padding: isMobile ? '10px 10px' : '20px 32px 20px',
               opacity: panelOpacity,
               transition: 'opacity 0.28s ease',
             }}

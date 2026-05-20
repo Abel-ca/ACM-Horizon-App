@@ -257,6 +257,20 @@
     @apply inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-[0.2em];
   }
 
+  /* ── Mobile touch targets ── */
+  @media (max-width: 767px) {
+    .btn-approve {
+      @apply px-5 py-3;
+      min-height: 48px;
+      font-size: 11px;
+    }
+    .btn-redir {
+      @apply px-4 py-3;
+      min-height: 48px;
+      font-size: 11px;
+    }
+  }
+
   /* ── Scroll reveal ── */
   .sr-hidden {
     opacity: 0;

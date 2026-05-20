@@ -12,7 +12,7 @@ function nodeState(state) {
   return 'idle'
 }
 
-/* ── Tooltip ───────────────────────────────────────────── */
+/* ── Tooltip (desktop only) ────────────────────────────── */
 function Tooltip({ agent, theme, visible }) {
   if (!visible) return null
   return (
@@ -42,7 +42,6 @@ function Tooltip({ agent, theme, visible }) {
           {agent.description}
         </p>
       </div>
-      {/* Arrow */}
       <div
         style={{
           position: 'absolute',
@@ -58,7 +57,7 @@ function Tooltip({ agent, theme, visible }) {
 }
 
 /* ── Single agent node ─────────────────────────────────── */
-function AgentNode({ agent, state }) {
+function AgentNode({ agent, state, isMobile, hideTooltip }) {
   const theme  = getTheme(agent.id)
   const status = nodeState(state)
   const isRunning  = status === 'running'
@@ -67,11 +66,10 @@ function AgentNode({ agent, state }) {
   const isIdle     = status === 'idle'
   const isActive   = isRunning || isAwaiting || isApproved
 
-  const [hovered, setHovered]         = useState(false)
-  const [bouncing, setBouncing]       = useState(false)
-  const prevStatusRef                 = useRef(status)
+  const [hovered, setHovered]   = useState(false)
+  const [bouncing, setBouncing] = useState(false)
+  const prevStatusRef           = useRef(status)
 
-  /* Bounce animation when node becomes approved */
   useEffect(() => {
     if (prevStatusRef.current !== 'approved' && status === 'approved') {
       setBouncing(true)
@@ -82,20 +80,26 @@ function AgentNode({ agent, state }) {
 
   const color = isApproved ? '#10b981' : isActive ? theme.color : '#1e2530'
 
+  // On mobile: smaller nodes to fit 2x2
+  const outerSize = isMobile ? 56 : 72
+  const innerSize = isMobile ? 42 : 52
+  const iconSize  = isMobile ? 18 : 22
+  const checkSize = isMobile ? 16 : 20
+
   return (
     <div
       className="flex flex-col items-center"
       style={{ position: 'relative', flexShrink: 0 }}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => !hideTooltip && setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <Tooltip agent={agent} theme={theme} visible={hovered} />
+      {!hideTooltip && <Tooltip agent={agent} theme={theme} visible={hovered} />}
 
       {/* Outer pulsing ring */}
       <div
         className={isRunning ? 'agent-ring' : ''}
         style={{
-          width: 72, height: 72,
+          width: outerSize, height: outerSize,
           borderRadius: '50%',
           border: `2px solid ${isRunning ? theme.color + '55' : 'transparent'}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -107,63 +111,47 @@ function AgentNode({ agent, state }) {
         <div
           className={bouncing ? 'node-bounce' : ''}
           style={{
-            width: 52, height: 52,
+            width: innerSize, height: innerSize,
             borderRadius: '50%',
-            background: isApproved
-              ? 'rgba(16,185,129,0.12)'
-              : isActive
-              ? theme.bg
-              : 'rgba(255,255,255,0.02)',
+            background: isApproved ? 'rgba(16,185,129,0.12)' : isActive ? theme.bg : 'rgba(255,255,255,0.02)',
             border: `1.5px solid ${color}`,
-            boxShadow: isActive
-              ? `0 0 20px ${theme.glow}0.2), inset 0 0 10px ${theme.glow}0.06)`
-              : 'none',
+            boxShadow: isActive ? `0 0 20px ${theme.glow}0.2), inset 0 0 10px ${theme.glow}0.06)` : 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'default',
             transition: 'all 0.4s ease',
           }}
         >
-          {isApproved ? (
-            <Check size={20} style={{ color: '#10b981' }} strokeWidth={2.5} />
-          ) : (
-            <span style={{
-              fontSize: 22, lineHeight: 1,
-              color: isActive ? theme.color : '#2d3a4a',
-              transition: 'color 0.4s ease',
-              userSelect: 'none',
-            }}>
-              {agent.icon}
-            </span>
-          )}
+          {isApproved
+            ? <Check size={checkSize} style={{ color: '#10b981' }} strokeWidth={2.5} />
+            : <span style={{ fontSize: iconSize, lineHeight: 1, color: isActive ? theme.color : '#2d3a4a', transition: 'color 0.4s ease', userSelect: 'none' }}>
+                {agent.icon}
+              </span>
+          }
         </div>
       </div>
 
       {/* Label */}
-      <div
-        className="mt-1.5 text-center"
-        style={{ width: 76, opacity: isIdle ? 0.35 : 1, transition: 'opacity 0.4s ease' }}
-      >
-        <p className="text-[8px] font-extrabold uppercase tracking-[0.22em] leading-none"
+      <div className="mt-1.5 text-center" style={{ opacity: isIdle ? 0.35 : 1, transition: 'opacity 0.4s ease' }}>
+        <p className={`font-extrabold uppercase leading-none ${isMobile ? 'text-[7px] tracking-[0.18em]' : 'text-[8px] tracking-[0.22em]'}`}
            style={{ color: isApproved ? '#10b981' : isActive ? theme.color : '#3a4255' }}>
           {agent.role}
         </p>
-        <p className="text-[10px] mt-0.5 leading-none"
-           style={{ color: isActive || isApproved ? '#7a8299' : '#3a4255' }}>
-          {agent.name.split(' ').slice(0, 2).join(' ')}
-        </p>
+        {!isMobile && (
+          <p className="text-[10px] mt-0.5 leading-none"
+             style={{ color: isActive || isApproved ? '#7a8299' : '#3a4255' }}>
+            {agent.name.split(' ').slice(0, 2).join(' ')}
+          </p>
+        )}
       </div>
     </div>
   )
 }
 
-/* ── Connector track between nodes ────────────────────── */
+/* ── Connector (desktop only) ──────────────────────────── */
 function Connector({ fromApproved, fromRunning, fromColor, fromGlow }) {
   const lit = fromApproved || fromRunning
   return (
     <div className="relative flex-1 mx-2" style={{ height: 2, marginBottom: 28 }}>
-      {/* Static track */}
       <div className="absolute inset-0 rounded-full" style={{ background: lit ? `${fromGlow}0.3)` : '#1e2530' }} />
-      {/* Traveling particle */}
       {lit && (
         <div
           className="pipeline-particle"
@@ -178,33 +166,51 @@ function Connector({ fromApproved, fromRunning, fromColor, fromGlow }) {
 }
 
 /* ── Final star node ──────────────────────────────────── */
-function FinalNode({ complete }) {
+function FinalNode({ complete, small }) {
+  const sz = small ? 38 : 52
   return (
     <div className="flex flex-col items-center flex-shrink-0">
-      <div
-        style={{
-          width: 52, height: 52, borderRadius: '50%',
-          background: complete ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.02)',
-          border: `1.5px solid ${complete ? '#f59e0b' : '#1e2530'}`,
-          boxShadow: complete ? '0 0 24px rgba(245,158,11,0.25)' : 'none',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          opacity: complete ? 1 : 0.28,
-          transition: 'all 0.5s ease',
-        }}
-      >
-        <span style={{ fontSize: 24, color: complete ? '#f59e0b' : '#2d3a4a', lineHeight: 1 }}>★</span>
+      <div style={{
+        width: sz, height: sz, borderRadius: '50%',
+        background: complete ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.02)',
+        border: `1.5px solid ${complete ? '#f59e0b' : '#1e2530'}`,
+        boxShadow: complete ? '0 0 24px rgba(245,158,11,0.25)' : 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        opacity: complete ? 1 : 0.28,
+        transition: 'all 0.5s ease',
+      }}>
+        <span style={{ fontSize: small ? 18 : 24, color: complete ? '#f59e0b' : '#2d3a4a', lineHeight: 1 }}>★</span>
       </div>
-      <div className="mt-1.5 text-center" style={{ width: 64, opacity: complete ? 1 : 0.28, transition: 'opacity 0.5s' }}>
+      <div className="mt-1.5 text-center" style={{ opacity: complete ? 1 : 0.28, transition: 'opacity 0.5s' }}>
         <p className="text-[8px] font-extrabold uppercase tracking-[0.22em] leading-none"
            style={{ color: complete ? '#f59e0b' : '#3a4255' }}>FIN</p>
-        <p className="text-[10px] mt-0.5 leading-none" style={{ color: complete ? '#7a8299' : '#3a4255' }}>Completo</p>
       </div>
     </div>
   )
 }
 
 /* ── Pipeline ─────────────────────────────────────────── */
-export default function PipelineProgress({ agentStates, campaignComplete }) {
+export default function PipelineProgress({ agentStates, campaignComplete, isMobile }) {
+
+  /* ── Mobile: 2x2 grid ── */
+  if (isMobile) {
+    return (
+      <div style={{ width: '100%', padding: '4px 8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', marginBottom: 8 }}>
+          {AGENTS.map(agent => (
+            <div key={agent.id} style={{ display: 'flex', justifyContent: 'center' }}>
+              <AgentNode agent={agent} state={agentStates[agent.id]} isMobile hideTooltip />
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <FinalNode complete={campaignComplete} small />
+        </div>
+      </div>
+    )
+  }
+
+  /* ── Desktop: horizontal row ── */
   return (
     <div className="flex items-center">
       {AGENTS.map((agent, i) => {
@@ -212,10 +218,9 @@ export default function PipelineProgress({ agentStates, campaignComplete }) {
         const status = nodeState(state)
         const theme  = getTheme(agent.id)
         const isLast = i === AGENTS.length - 1
-
         return (
           <div key={agent.id} className="flex items-center flex-1 min-w-0">
-            <AgentNode agent={agent} state={state} />
+            <AgentNode agent={agent} state={state} isMobile={false} />
             {!isLast && (
               <Connector
                 fromApproved={status === 'approved'}
