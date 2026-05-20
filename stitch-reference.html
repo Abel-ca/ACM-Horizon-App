@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stitch Reference — Winnerly Visual Patterns</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Design Tokens ── */
+    :root {
+      --bg:           #0d112a;
+      --bg-low:       #080c25;
+      --surf:         #1a1e37;
+      --surf-high:    #242842;
+      --on-surf:      #dee0ff;
+      --on-variant:   #c4c5d9;
+      --outline:      #8e90a2;
+      --outline-dim:  #434656;
+      --electric:     #2e5bff;
+      --teal:         #00f2d1;
+      --teal-dim:     #00dfc1;
+      --purple:       #b000ec;
+      --primary:      #b8c3ff;
+      --amber:        #f59e0b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--on-surf);
+      font-family: 'Hanken Grotesk', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Keyframes ── */
+    @keyframes drift1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33%       { transform: translate(4vw, 3vh) scale(1.06); }
+      66%       { transform: translate(-3vw, 5vh) scale(0.96); }
+    }
+    @keyframes drift2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      40%       { transform: translate(-5vw, 4vh) scale(1.08); }
+      70%       { transform: translate(3vw, -3vh) scale(0.95); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shineSweep {
+      0%   { transform: translateX(-100%) skewX(-15deg); }
+      100% { transform: translateX(300%) skewX(-15deg); }
+    }
+    @keyframes typingDot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40%           { transform: scale(1.0); opacity: 1.0; }
+    }
+    @keyframes floatParticle {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.8; }
+      90%  { opacity: 0.3; }
+      100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+    }
+    @keyframes chatBubbleIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50%       { opacity: 0.7; transform: scale(1.14); }
+    }
+
+    /* ── Background ── */
+    .mesh-bg {
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; overflow: hidden;
+      background: var(--bg);
+    }
+    .mesh-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(90px); pointer-events: none;
+    }
+    .mesh-orb-1 {
+      width: 70vw; height: 70vw; top: -25%; left: -20%;
+      background: radial-gradient(circle, rgba(46,91,255,0.22) 0%, transparent 60%);
+      animation: drift1 24s ease-in-out infinite;
+    }
+    .mesh-orb-2 {
+      width: 60vw; height: 60vw; top: 5%; right: -22%;
+      background: radial-gradient(circle, rgba(0,242,209,0.15) 0%, transparent 60%);
+      animation: drift2 30s ease-in-out infinite;
+    }
+    .mesh-orb-3 {
+      width: 50vw; height: 50vw; bottom: -18%; left: 45%;
+      background: radial-gradient(circle, rgba(176,0,236,0.14) 0%, transparent 60%);
+      animation: drift1 26s 5s ease-in-out infinite reverse;
+    }
+
+    /* ── Cursor glow ── */
+    .cursor-glow {
+      position: fixed; width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(46,91,255,0.08) 0%, transparent 70%);
+      pointer-events: none; mix-blend-mode: screen;
+      transform: translate(-50%, -50%);
+      transition: left 0.08s ease, top 0.08s ease;
+      z-index: 1;
+    }
+
+    /* ── Particle ── */
+    .particle {
+      position: absolute; border-radius: 50%;
+      pointer-events: none;
+      animation: floatParticle linear infinite;
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative; z-index: 2;
+      max-width: 1200px; margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* ── Section labels ── */
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--outline);
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::before {
+      content: ''; display: block;
+      width: 24px; height: 1px;
+      background: var(--outline-dim);
+    }
+    h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px; font-weight: 700;
+      color: var(--on-surf); margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    .section { margin-bottom: 60px; }
+
+    /* ── Glass card ── */
+    .glass-card {
+      background: rgba(22,26,51,0.4);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(184,195,255,0.10);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      position: relative; overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .glass-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
+      transform: translateX(-100%) skewX(-15deg);
+      pointer-events: none; z-index: 1;
+    }
+    .glass-card:hover::before { animation: shineSweep 0.7s ease forwards; }
+    .glass-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(46,91,255,0.30);
+      box-shadow: 0 16px 48px rgba(46,91,255,0.18), 0 0 0 1px rgba(46,91,255,0.10);
+    }
+
+    /* ── Glass panel ── */
+    .glass-panel {
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+    }
+
+    /* ── Stagger animations ── */
+    .stagger-1 { animation: fadeInUp 0.55s 0.05s ease both; }
+    .stagger-2 { animation: fadeInUp 0.55s 0.12s ease both; }
+    .stagger-3 { animation: fadeInUp 0.55s 0.20s ease both; }
+    .stagger-4 { animation: fadeInUp 0.55s 0.28s ease both; }
+    .stagger-5 { animation: fadeInUp 0.55s 0.36s ease both; }
+
+    /* ── Chat bubbles ── */
+    .chat-bubble { animation: chatBubbleIn 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+    .bubble-ceo {
+      max-width: 75%;
+      background: rgba(46,91,255,0.18);
+      border: 1px solid rgba(46,91,255,0.30);
+      border-radius: 18px 18px 4px 18px;
+      padding: 10px 14px;
+      margin-left: auto;
+    }
+    .bubble-director {
+      max-width: 80%;
+      background: rgba(8,12,37,0.70);
+      border: 1px solid rgba(184,195,255,0.10);
+      border-radius: 4px 18px 18px 18px;
+      padding: 10px 14px;
+      backdrop-filter: blur(8px);
+    }
+    .bubble-system {
+      background: rgba(0,223,193,0.08);
+      border: 1px solid rgba(0,223,193,0.18);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; color: var(--teal-dim);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+
+    /* ── Typing dots ── */
+    .typing-dot {
+      display: inline-block;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor;
+      animation: typingDot 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    /* ── Status badge ── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(184,195,255,0.10);
+      border-radius: 999px; padding: 5px 10px;
+    }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--teal-dim);
+    }
+    .status-dot.active {
+      background: #6366f1;
+      box-shadow: 0 0 8px #6366f1;
+      animation: ringPulse 1.8s ease-in-out infinite;
+    }
+
+    /* ── Agent icon ── */
+    .agent-icon {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+
+    /* ── Role badge ── */
+    .role-badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+    }
+
+    /* ── Input ── */
+    .chat-input {
+      flex: 1; padding: 10px 14px;
+      background: rgba(8,12,37,0.65);
+      border: 1px solid rgba(184,195,255,0.10);
+      border-radius: 12px; color: var(--on-surf);
+      font-size: 13.5px; font-family: 'Hanken Grotesk', sans-serif;
+      outline: none; transition: border-color 0.2s;
+    }
+    .chat-input:focus { border-color: rgba(46,91,255,0.50); }
+    .send-btn {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: var(--electric);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #efefff;
+      box-shadow: 0 4px 16px rgba(46,91,255,0.35);
+      transition: all 0.2s;
+    }
+    .send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(46,91,255,0.55); }
+
+    /* ── Subagent card ── */
+    .subagent-card {
+      position: relative;
+      height: 240px; border-radius: 16px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .accent-bar {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      border-radius: 3px 0 0 3px;
+    }
+
+    /* ── Misc ── */
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .flex-center { display: flex; align-items: center; }
+    .gap-3 { gap: 12px; }
+    .gap-2 { gap: 8px; }
+    .mt-1 { margin-top: 4px; }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+
+    /* ── Color swatches ── */
+    .swatch-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .swatch {
+      width: 64px; display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+    }
+    .swatch-block {
+      width: 64px; height: 40px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .swatch-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5px; color: var(--outline);
+      text-align: center; word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Mesh background ── -->
+<div class="mesh-bg" aria-hidden="true">
+  <div class="mesh-orb mesh-orb-1"></div>
+  <div class="mesh-orb mesh-orb-2"></div>
+  <div class="mesh-orb mesh-orb-3"></div>
+</div>
+
+<!-- ── Cursor glow ── -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ── Floating particles ── -->
+<div id="particleContainer" aria-hidden="true"></div>
+
+<!-- ── Page content ── -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="stagger-1" style="margin-bottom:48px;">
+    <p class="section-label">Stitch Reference</p>
+    <h1 style="font-family:'Sora',sans-serif;font-size:36px;font-weight:800;letter-spacing:-0.025em;color:var(--on-surf);margin-bottom:10px;">
+      Winnerly Visual Patterns
+    </h1>
+    <p style="color:var(--outline);font-size:15px;max-width:520px;line-height:1.6;">
+      Reference sheet for glassmorphism, typography, cursor FX, particles, chat bubbles and agent cards.
+    </p>
+  </div>
+
+  <!-- ── 1. Color Palette ── -->
+  <div class="section stagger-2">
+    <p class="section-label">01 — Colors</p>
+    <h2>Design Tokens</h2>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch-block" style="background:#0d112a;"></div><span class="swatch-label">--bg</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#080c25;"></div><span class="swatch-label">--bg-low</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#1a1e37;"></div><span class="swatch-label">--surf</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#242842;"></div><span class="swatch-label">--surf-high</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#2e5bff;"></div><span class="swatch-label">--electric</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#00f2d1;"></div><span class="swatch-label">--teal</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#00dfc1;"></div><span class="swatch-label">--teal-dim</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#b000ec;"></div><span class="swatch-label">--purple</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#b8c3ff;"></div><span class="swatch-label">--primary</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#dee0ff;"></div><span class="swatch-label">--on-surf</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#f59e0b;"></div><span class="swatch-label">--amber</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#6366f1;"></div><span class="swatch-label">director</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#06b6d4;"></div><span class="swatch-label">researcher</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#8b5cf6;"></div><span class="swatch-label">copywriter</span></div>
+      <div class="swatch"><div class="swatch-block" style="background:#ec4899;"></div><span class="swatch-label">creative</span></div>
+    </div>
+  </div>
+
+  <!-- ── 2. Typography ── -->
+  <div class="section stagger-3">
+    <p class="section-label">02 — Typography</p>
+    <h2>Type Scale</h2>
+    <div class="glass-card" style="padding:28px;">
+      <p style="font-family:'Sora',sans-serif;font-size:40px;font-weight:800;letter-spacing:-0.025em;color:var(--on-surf);line-height:1.1;">Sora 800 — Headlines</p>
+      <p style="font-family:'Sora',sans-serif;font-size:24px;font-weight:700;color:var(--primary);margin-top:12px;">Sora 700 — Subheadings & Card Titles</p>
+      <p style="font-size:16px;color:var(--on-variant);line-height:1.6;margin-top:16px;">Hanken Grotesk 400 — Body text for workspace collaboration, data display, and longer-form content. Clear and contemporary.</p>
+      <p style="font-size:14px;font-weight:600;color:var(--on-surf);margin-top:8px;">Hanken Grotesk 600 — Medium weight for labels and UI emphasis.</p>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--outline);letter-spacing:0.1em;text-transform:uppercase;margin-top:16px;">JETBRAINS MONO — METADATA · STATUS · CODE · LABELS</p>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6366f1;letter-spacing:0.05em;margin-top:6px;">◈ DIRECTOR · ORQUESTADOR</p>
+    </div>
+  </div>
+
+  <!-- ── 3. Glass Cards ── -->
+  <div class="section stagger-4">
+    <p class="section-label">03 — Glass Cards</p>
+    <h2>Glassmorphism Variants</h2>
+    <div class="grid-3">
+      <div class="glass-card" style="padding:20px;">
+        <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6366f1;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;">◈ Director</p>
+        <p style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--on-surf);">glass-card</p>
+        <p style="font-size:12px;color:var(--outline);margin-top:4px;line-height:1.5;">rgba(22,26,51,0.4) · blur(16px) · border-top specular highlight · hover lift + shine sweep</p>
+      </div>
+      <div class="glass-panel" style="padding:20px;">
+        <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#06b6d4;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;">◎ Subtle</p>
+        <p style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--on-surf);">glass-panel</p>
+        <p style="font-size:12px;color:var(--outline);margin-top:4px;line-height:1.5;">rgba(255,255,255,0.02) · blur(24px) · ultra-subtle border</p>
+      </div>
+      <div class="glass-card" style="padding:20px;border-color:rgba(46,91,255,0.28);box-shadow:0 12px 40px rgba(46,91,255,0.15);">
+        <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--teal-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;">✓ Approved</p>
+        <p style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--on-surf);">glass-card active</p>
+        <p style="font-size:12px;color:var(--outline);margin-top:4px;line-height:1.5;">With electric blue border glow on hover/active state</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4. Chat Bubbles ── -->
+  <div class="section stagger-5">
+    <p class="section-label">04 — Chat Interface</p>
+    <h2>Message Bubbles</h2>
+    <div class="glass-card" style="padding:0;overflow:hidden;height:420px;display:flex;flex-direction:column;">
+      <!-- Card header -->
+      <div style="padding:14px 20px;border-bottom:1px solid rgba(184,195,255,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(22,26,51,0.35);">
+        <div class="flex-center gap-3">
+          <div class="agent-icon" style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);color:#6366f1;">◈</div>
+          <div>
+            <p style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--on-surf);">Director de Marketing</p>
+            <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--outline-dim);letter-spacing:0.12em;text-transform:uppercase;margin-top:2px;">ORQUESTADOR · Eje central</p>
+          </div>
+        </div>
+        <div class="status-badge">
+          <div class="status-dot active"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:#6366f1;">Procesando</span>
+        </div>
+      </div>
+      <!-- Chat area -->
+      <div style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:0;">
+        <!-- Director intro -->
+        <div class="chat-bubble" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;">
+          <div class="agent-icon" style="width:30px;height:30px;border-radius:9px;font-size:14px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);color:#6366f1;flex-shrink:0;margin-top:2px;">◈</div>
+          <div style="max-width:80%;">
+            <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6366f1;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">El Director</p>
+            <div class="bubble-director">
+              <p style="color:var(--on-variant);font-size:13.5px;line-height:1.6;">¡Hola! Soy el Director de Marketing de ACM Horizon. Cuéntame qué producto quieres analizar — yo coordino al equipo completo desde aquí.</p>
+            </div>
+          </div>
+        </div>
+        <!-- CEO bubble -->
+        <div class="chat-bubble" style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+          <div class="bubble-ceo">
+            <p style="color:var(--on-surf);font-size:13.5px;line-height:1.55;">Quiero analizar una plancha de cabello inalámbrica para dropshipping en Ecuador.</p>
+          </div>
+        </div>
+        <!-- System pill -->
+        <div class="chat-bubble" style="display:flex;justify-content:center;margin-bottom:12px;">
+          <div class="bubble-system">
+            <div style="width:5px;height:5px;border-radius:50%;background:var(--teal-dim);"></div>
+            Activando equipo de subagentes...
+          </div>
+        </div>
+        <!-- Director brief -->
+        <div class="chat-bubble" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;">
+          <div class="agent-icon" style="width:30px;height:30px;border-radius:9px;font-size:14px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);color:#6366f1;flex-shrink:0;margin-top:2px;">◈</div>
+          <div style="max-width:80%;">
+            <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6366f1;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">El Director</p>
+            <div class="bubble-director">
+              <p style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;color:var(--on-variant);">🟢 Verde — Producto con potencial<br/><br/>La plancha inalámbrica tiene ángulo de problema claro (quemaduras de cable, falta de movilidad) con mercado femenino amplio en Ecuador. Veo 3 ángulos principales: viaje/portabilidad, resultado rápido y comparación con métodos tradicionales...</p>
+            </div>
+          </div>
+        </div>
+        <!-- Live typing bubble -->
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div class="agent-icon" style="width:30px;height:30px;border-radius:9px;font-size:14px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);color:#6366f1;flex-shrink:0;margin-top:2px;">◈</div>
+          <div style="max-width:80%;">
+            <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#6366f1;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">El Director</p>
+            <div class="bubble-director">
+              <div style="display:flex;gap:4px;align-items:center;color:#6366f1;">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Input bar -->
+      <div style="padding:12px 16px;border-top:1px solid rgba(184,195,255,0.07);display:flex;gap:8px;flex-shrink:0;">
+        <input class="chat-input" placeholder="Dile al Director qué producto quieres analizar..." />
+        <button class="send-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5. Subagent Cards ── -->
+  <div class="section">
+    <p class="section-label">05 — Subagent Cards</p>
+    <h2>Observation Grid (Read-only)</h2>
+    <div class="grid-3">
+      <!-- Researcher - running -->
+      <div class="glass-card subagent-card stagger-2">
+        <div class="accent-bar" style="background:#06b6d4;"></div>
+        <div style="padding:12px 16px 10px 20px;border-bottom:1px solid rgba(184,195,255,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+          <div class="flex-center gap-2">
+            <div class="agent-icon" style="width:36px;height:36px;border-radius:10px;font-size:16px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);color:#06b6d4;">◎</div>
+            <div>
+              <p style="font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:var(--on-surf);">Investigador</p>
+              <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--outline-dim);letter-spacing:0.1em;text-transform:uppercase;margin-top:1px;">RESEARCH</p>
+            </div>
+          </div>
+          <div style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.22);border-radius:999px;padding:3px 9px;display:flex;align-items:center;gap:5px;">
+            <div style="width:5px;height:5px;border-radius:50%;background:#06b6d4;box-shadow:0 0 6px #06b6d4;animation:ringPulse 1.8s ease-in-out infinite;"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;color:#06b6d4;">Analizando</span>
+          </div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:10px 16px 10px 20px;position:relative;">
+          <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.75;color:var(--on-variant);white-space:pre-wrap;">🔍 PRODUCTO: Plancha inalámbrica
+
+📊 VIABILIDAD: 🟢 Alto
+
+**Búsqueda 1 — Facebook Ads Library:**
+Encontrados 12 anunciantes activos en Colombia...</p>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(22,26,51,0.9));pointer-events:none;"></div>
+        </div>
+      </div>
+      <!-- Copywriter - idle -->
+      <div class="glass-card subagent-card stagger-3" style="opacity:0.65;">
+        <div class="accent-bar" style="background:#242842;"></div>
+        <div style="padding:12px 16px 10px 20px;border-bottom:1px solid rgba(184,195,255,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+          <div class="flex-center gap-2">
+            <div class="agent-icon" style="width:36px;height:36px;border-radius:10px;font-size:16px;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);color:#434656;">◉</div>
+            <div>
+              <p style="font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:#8e90a2;">Copywriter</p>
+              <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--outline-dim);letter-spacing:0.1em;text-transform:uppercase;margin-top:1px;">COPY</p>
+            </div>
+          </div>
+          <div style="background:rgba(184,195,255,0.04);border:1px solid rgba(184,195,255,0.08);border-radius:999px;padding:3px 9px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--outline-dim);">En espera</span>
+          </div>
+        </div>
+        <div style="flex:1;padding:10px 16px 10px 20px;">
+          <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--outline-dim);font-style:italic;">En espera del Director...</p>
+        </div>
+      </div>
+      <!-- Creative - approved -->
+      <div class="glass-card subagent-card stagger-4">
+        <div class="accent-bar" style="background:var(--teal-dim);"></div>
+        <div style="padding:12px 16px 10px 20px;border-bottom:1px solid rgba(184,195,255,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+          <div class="flex-center gap-2">
+            <div class="agent-icon" style="width:36px;height:36px;border-radius:10px;font-size:16px;background:rgba(236,72,153,0.08);border:1px solid rgba(236,72,153,0.25);color:#ec4899;">◆</div>
+            <div>
+              <p style="font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:var(--on-surf);">Dir. Creativo</p>
+              <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--outline-dim);letter-spacing:0.1em;text-transform:uppercase;margin-top:1px;">CREATIVO</p>
+            </div>
+          </div>
+          <div style="background:rgba(0,223,193,0.08);border:1px solid rgba(0,223,193,0.22);border-radius:999px;padding:3px 9px;display:flex;align-items:center;gap:5px;">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#00dfc1" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;color:var(--teal-dim);">Completo</span>
+          </div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:10px 16px 10px 20px;position:relative;">
+          <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.75;color:var(--on-variant);white-space:pre-wrap;">🎨 BRIEF VISUAL — Plancha
+
+🖼️ CONCEPTO: Mujer de 25-35 años lista para salir, en espejo del baño...</p>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(22,26,51,0.9));pointer-events:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 6. Agent Role Badges ── -->
+  <div class="section">
+    <p class="section-label">06 — Badges & Status</p>
+    <h2>Role Badges & Status Indicators</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+      <span class="role-badge" style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.25);color:#6366f1;">ORQUESTADOR</span>
+      <span class="role-badge" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);color:#06b6d4;">RESEARCH</span>
+      <span class="role-badge" style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);color:#8b5cf6;">COPY</span>
+      <span class="role-badge" style="background:rgba(236,72,153,0.08);border:1px solid rgba(236,72,153,0.25);color:#ec4899;">CREATIVO</span>
+      <span class="role-badge" style="background:rgba(0,223,193,0.08);border:1px solid rgba(0,223,193,0.30);color:var(--teal-dim);">APROBADO</span>
+      <span class="role-badge" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:var(--amber);">COMPLETO</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <div class="status-badge"><div class="status-dot" style="background:#6366f1;box-shadow:0 0 8px #6366f1;animation:ringPulse 1.8s ease-in-out infinite;"></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:#6366f1;">Procesando</span></div>
+      <div class="status-badge"><div class="status-dot" style="background:var(--teal-dim);"></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--teal-dim);">Completo</span></div>
+      <div class="status-badge"><div class="status-dot" style="background:var(--outline-dim);"></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--outline);">En espera</span></div>
+      <div class="status-badge"><div class="status-dot" style="background:#f59e0b;box-shadow:0 0 8px #f59e0b;"></div><span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:#f59e0b;">Listo</span></div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  // ── Cursor glow ──
+  const glow = document.getElementById('cursorGlow')
+  document.addEventListener('mousemove', e => {
+    glow.style.left = e.clientX + 'px'
+    glow.style.top  = e.clientY + 'px'
+  }, { passive: true })
+
+  // ── Floating particles ──
+  const container = document.getElementById('particleContainer')
+  const colors = ['#2e5bff','#00f2d1','#b000ec','#6366f1']
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div')
+    p.className = 'particle'
+    const size = 1 + (i % 3)
+    p.style.cssText = `
+      left:${(i * 3.33) % 100}%;
+      bottom:${(i * 7.1) % 60}%;
+      width:${size}px; height:${size}px;
+      background:${colors[i % colors.length]};
+      opacity:${0.15 + (i % 4) * 0.05};
+      animation-duration:${8 + (i % 12)}s;
+      animation-delay:-${(i * 0.8) % 10}s;
+      position:fixed;
+    `
+    container.appendChild(p)
+  }
+</script>
+</body>
+</html>
