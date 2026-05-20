@@ -28,7 +28,8 @@ function Metric({ label, value, prefix = '', decimals = 0, color }) {
   const display = decimals > 0 ? anim.toFixed(decimals) : Math.round(anim)
   return (
     <div className="flex flex-col px-3 py-1.5 rounded-xl glass" style={{ minWidth: 72 }}>
-      <span className="text-[8px] font-bold uppercase tracking-[0.22em]" style={{ color: 'rgba(255,255,255,0.28)' }}>
+      <span className="text-[8px] font-bold uppercase tracking-[0.22em]"
+            style={{ color: 'rgba(184,195,255,0.35)', fontFamily: 'JetBrains Mono, monospace' }}>
         {label}
       </span>
       <span className="text-[14px] font-extrabold leading-none mt-0.5" style={{ color }}>
@@ -55,7 +56,7 @@ export default function Header({
           <button
             onClick={onOpenSidebar}
             className="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-150 glass"
-            style={{ color: 'rgba(255,255,255,0.5)' }}
+            style={{ color: 'rgba(184,195,255,0.45)' }}
             aria-label="Abrir historial"
           >
             <Menu size={18} strokeWidth={2} />
@@ -64,23 +65,32 @@ export default function Header({
 
         <div
           className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)' }}
+          style={{
+            background: 'rgba(46,91,255,0.15)',
+            border: '1px solid rgba(46,91,255,0.30)',
+          }}
         >
-          <Zap size={15} style={{ color: '#6366f1' }} />
-        </div>
-        <div className="leading-none">
-          <span className="text-[15px] font-black tracking-tight" style={{ color: '#f0f4ff' }}>ACM</span>
-          <span className="text-[15px] font-black tracking-tight ml-1.5" style={{ color: '#6366f1' }}>Horizon</span>
+          <Zap size={15} style={{ color: '#2e5bff' }} />
         </div>
 
-        {/* Sistema activo — hidden on mobile to save space */}
+        <div className="leading-none font-display">
+          <span className="text-[15px] font-bold tracking-tight" style={{ color: '#dee0ff' }}>Win</span>
+          <span className="text-[15px] font-bold tracking-tight" style={{ color: '#b8c3ff' }}>nerly</span>
+        </div>
+
+        {/* Sistema activo — hidden on mobile */}
         {!isMobile && (
           <div
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full ml-2"
-            style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
+            style={{
+              background: 'rgba(0,223,193,0.08)',
+              border: '1px solid rgba(0,223,193,0.20)',
+            }}
           >
-            <span className="system-dot w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#10b981' }} />
-            <span className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: '#10b981' }}>
+            <span className="system-dot w-1.5 h-1.5 rounded-full inline-block"
+                  style={{ background: '#00dfc1' }} />
+            <span className="text-[9px] font-bold uppercase tracking-[0.2em]"
+                  style={{ color: '#00dfc1', fontFamily: 'JetBrains Mono, monospace' }}>
               Sistema activo
             </span>
           </div>
@@ -90,9 +100,9 @@ export default function Header({
       {/* Center: metrics — hidden on mobile */}
       {!isMobile && (
         <div className="flex items-center gap-2">
-          <Metric label="Campañas"  value={totalCampaigns}    color="#6366f1" />
-          <Metric label="Costo API" value={totalCost} prefix="$" decimals={2} color="#06b6d4" />
-          <Metric label="Validados" value={validatedProducts}  color="#8b5cf6" />
+          <Metric label="Campañas"  value={totalCampaigns}               color="#b8c3ff" />
+          <Metric label="Costo API" value={totalCost} prefix="$" decimals={2} color="#00dfc1" />
+          <Metric label="Validados" value={validatedProducts}            color="#ecb1ff" />
         </div>
       )}
 
@@ -102,22 +112,23 @@ export default function Header({
           onClick={onOpenApiModal}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200"
           style={{
-            background: apiKey ? 'rgba(16,185,129,0.08)' : 'rgba(244,63,94,0.08)',
-            border: `1px solid ${apiKey ? 'rgba(16,185,129,0.22)' : 'rgba(244,63,94,0.22)'}`,
-            color: apiKey ? '#10b981' : '#f43f5e',
+            background: apiKey ? 'rgba(0,223,193,0.08)' : 'rgba(255,180,171,0.08)',
+            border: `1px solid ${apiKey ? 'rgba(0,223,193,0.22)' : 'rgba(255,180,171,0.22)'}`,
+            color: apiKey ? '#00dfc1' : '#ffb4ab',
+            fontFamily: 'JetBrains Mono, monospace',
           }}
         >
           <Key size={12} strokeWidth={2.5} />
-          {/* On mobile, abbreviate */}
           {isMobile ? (apiKey ? '✓' : '!') : (apiKey ? 'API Conectada' : 'Sin API Key')}
         </button>
+
         <button
           onClick={onReset}
           title="Reiniciar"
           className="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-150 glass"
-          style={{ color: 'rgba(255,255,255,0.3)' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#f0f4ff' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
+          style={{ color: 'rgba(184,195,255,0.28)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#dee0ff' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(184,195,255,0.28)' }}
         >
           <RotateCcw size={14} strokeWidth={2} />
         </button>

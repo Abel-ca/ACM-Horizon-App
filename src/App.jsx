@@ -62,33 +62,36 @@ function Confetti() {
 function EmptyHero() {
   return (
     <div className="flex flex-col items-center justify-center pt-16 pb-8 text-center">
-      {/* Rocket SVG */}
+      {/* Rocket SVG — Winnerly palette */}
       <svg width="100" height="120" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg"
            style={{ marginBottom: 28, opacity: 0.5 }}>
-        <ellipse cx="50" cy="52" rx="18" ry="32" fill="#1a2030" stroke="#232d3f" strokeWidth="1.5"/>
-        <path d="M50 8C36 22 32 38 32 52H68C68 38 64 22 50 8Z" fill="#1e2535" stroke="#232d3f" strokeWidth="1.5"/>
-        <circle cx="50" cy="48" r="9" fill="#0e1117" stroke="#6366f1" strokeWidth="1.5"/>
-        <circle cx="50" cy="48" r="5" fill="rgba(99,102,241,0.15)"/>
-        <path d="M32 68L16 86L32 80Z" fill="#1a2030" stroke="#232d3f" strokeWidth="1.5"/>
-        <path d="M68 68L84 86L68 80Z" fill="#1a2030" stroke="#232d3f" strokeWidth="1.5"/>
-        <rect x="42" y="82" width="16" height="7" rx="2" fill="#1a2030" stroke="#232d3f" strokeWidth="1.5"/>
-        <ellipse cx="50" cy="100" rx="8" ry="11" fill="rgba(99,102,241,0.25)"/>
-        <ellipse cx="50" cy="103" rx="5" ry="7"  fill="rgba(99,102,241,0.45)"/>
-        <ellipse cx="50" cy="106" rx="2.5" ry="4" fill="rgba(165,180,252,0.6)"/>
-        <circle cx="12" cy="24" r="1.2" fill="#232d3f"/>
-        <circle cx="22" cy="8"  r="0.9" fill="#232d3f"/>
-        <circle cx="82" cy="16" r="1.2" fill="#232d3f"/>
-        <circle cx="92" cy="36" r="0.9" fill="#232d3f"/>
-        <circle cx="6"  cy="50" r="0.9" fill="#232d3f"/>
-        <circle cx="96" cy="58" r="1.2" fill="#232d3f"/>
+        <ellipse cx="50" cy="52" rx="18" ry="32" fill="#1a1e37" stroke="#242842" strokeWidth="1.5"/>
+        <path d="M50 8C36 22 32 38 32 52H68C68 38 64 22 50 8Z" fill="#242842" stroke="#2f334e" strokeWidth="1.5"/>
+        <circle cx="50" cy="48" r="9" fill="#080c25" stroke="#2e5bff" strokeWidth="1.5"/>
+        <circle cx="50" cy="48" r="5" fill="rgba(46,91,255,0.15)"/>
+        <path d="M32 68L16 86L32 80Z" fill="#1a1e37" stroke="#242842" strokeWidth="1.5"/>
+        <path d="M68 68L84 86L68 80Z" fill="#1a1e37" stroke="#242842" strokeWidth="1.5"/>
+        <rect x="42" y="82" width="16" height="7" rx="2" fill="#1a1e37" stroke="#242842" strokeWidth="1.5"/>
+        <ellipse cx="50" cy="100" rx="8" ry="11" fill="rgba(46,91,255,0.22)"/>
+        <ellipse cx="50" cy="103" rx="5" ry="7"  fill="rgba(0,242,209,0.35)"/>
+        <ellipse cx="50" cy="106" rx="2.5" ry="4" fill="rgba(184,195,255,0.55)"/>
+        <circle cx="12" cy="24" r="1.2" fill="#242842"/>
+        <circle cx="22" cy="8"  r="0.9" fill="#242842"/>
+        <circle cx="82" cy="16" r="1.2" fill="#242842"/>
+        <circle cx="92" cy="36" r="0.9" fill="#242842"/>
+        <circle cx="6"  cy="50" r="0.9" fill="#242842"/>
+        <circle cx="96" cy="58" r="1.2" fill="#242842"/>
       </svg>
 
-      <h3 className="font-black mb-2 tracking-tight" style={{ fontSize: 22, color: '#f0f4ff', letterSpacing: '-0.02em' }}>
+      <h3
+        className="font-display font-bold mb-2 tracking-tight"
+        style={{ fontSize: 22, color: '#dee0ff', letterSpacing: '-0.02em' }}
+      >
         Tu primera campaña está a un
         <br />
         <span className="text-gradient-hero">producto de distancia</span>
       </h3>
-      <p className="text-sm max-w-xs" style={{ color: '#3a4255', lineHeight: 1.8 }}>
+      <p className="text-sm max-w-xs" style={{ color: '#8e90a2', lineHeight: 1.8 }}>
         Escribe un producto arriba y los 4 agentes de IA construirán tu brief completo.
       </p>
 
@@ -97,7 +100,7 @@ function EmptyHero() {
         {AGENTS.map((a, i) => {
           const colors = ['#6366f1', '#06b6d4', '#8b5cf6', '#ec4899']
           return (
-            <div key={a.id} className="flex flex-col items-center gap-2" style={{ opacity: 0.4 }}>
+            <div key={a.id} className="flex flex-col items-center gap-2" style={{ opacity: 0.35 }}>
               <div style={{
                 width: 40, height: 40, borderRadius: 12,
                 background: `${colors[i]}12`,
@@ -105,7 +108,10 @@ function EmptyHero() {
                 color: colors[i], fontSize: 18,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>{a.icon}</div>
-              <span className="text-[7px] uppercase tracking-[0.2em] font-bold" style={{ color: colors[i] }}>
+              <span
+                className="text-[7px] uppercase tracking-[0.2em] font-bold"
+                style={{ color: colors[i], fontFamily: 'JetBrains Mono, monospace' }}
+              >
                 {a.role}
               </span>
             </div>
@@ -201,7 +207,7 @@ export default function App() {
 
   /* ── Render ────────────────────────────────────────── */
   return (
-    <div style={{ height: '100vh', overflow: 'hidden', background: '#080a0f' }}>
+    <div style={{ height: '100vh', overflow: 'hidden', background: '#0d112a' }}>
 
       {/* Ambient blobs */}
       <DotGrid />

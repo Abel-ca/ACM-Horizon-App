@@ -29,16 +29,17 @@ function Tooltip({ agent, theme, visible }) {
       <div
         className="rounded-2xl px-4 py-3 text-center"
         style={{
-          background: 'rgba(14,17,23,0.95)',
+          background: 'rgba(8,12,37,0.97)',
           backdropFilter: 'blur(16px)',
           border: `1px solid ${theme.color}35`,
-          boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 24px ${theme.glow}0.15)`,
+          boxShadow: `0 8px 32px rgba(8,12,37,0.7), 0 0 24px ${theme.glow}0.12)`,
         }}
       >
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] mb-1" style={{ color: theme.color }}>
+        <p className="text-[10px] font-black uppercase tracking-[0.22em] mb-1"
+           style={{ color: theme.color, fontFamily: 'JetBrains Mono, monospace' }}>
           {agent.name}
         </p>
-        <p className="text-[10px] leading-relaxed" style={{ color: '#7a8299' }}>
+        <p className="text-[10px] leading-relaxed" style={{ color: '#8e90a2' }}>
           {agent.description}
         </p>
       </div>
@@ -47,7 +48,7 @@ function Tooltip({ agent, theme, visible }) {
           position: 'absolute',
           bottom: -6, left: '50%', transform: 'translateX(-50%) rotate(45deg)',
           width: 10, height: 10,
-          background: 'rgba(14,17,23,0.95)',
+          background: 'rgba(8,12,37,0.97)',
           border: `1px solid ${theme.color}35`,
           borderTop: 'none', borderLeft: 'none',
         }}
@@ -78,9 +79,8 @@ function AgentNode({ agent, state, isMobile, hideTooltip }) {
     prevStatusRef.current = status
   }, [status])
 
-  const color = isApproved ? '#10b981' : isActive ? theme.color : '#1e2530'
+  const color = isApproved ? '#00dfc1' : isActive ? theme.color : '#242842'
 
-  // On mobile: smaller nodes to fit 2x2
   const outerSize = isMobile ? 56 : 72
   const innerSize = isMobile ? 42 : 52
   const iconSize  = isMobile ? 18 : 22
@@ -103,7 +103,7 @@ function AgentNode({ agent, state, isMobile, hideTooltip }) {
           borderRadius: '50%',
           border: `2px solid ${isRunning ? theme.color + '55' : 'transparent'}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          opacity: isIdle ? 0.35 : 1,
+          opacity: isIdle ? 0.30 : 1,
           transition: 'opacity 0.4s ease',
         }}
       >
@@ -113,16 +113,25 @@ function AgentNode({ agent, state, isMobile, hideTooltip }) {
           style={{
             width: innerSize, height: innerSize,
             borderRadius: '50%',
-            background: isApproved ? 'rgba(16,185,129,0.12)' : isActive ? theme.bg : 'rgba(255,255,255,0.02)',
+            background: isApproved
+              ? 'rgba(0,223,193,0.10)'
+              : isActive ? theme.bg : 'rgba(184,195,255,0.03)',
             border: `1.5px solid ${color}`,
-            boxShadow: isActive ? `0 0 20px ${theme.glow}0.2), inset 0 0 10px ${theme.glow}0.06)` : 'none',
+            boxShadow: isActive
+              ? `0 0 20px ${theme.glow}0.18), inset 0 0 10px ${theme.glow}0.05)`
+              : 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.4s ease',
           }}
         >
           {isApproved
-            ? <Check size={checkSize} style={{ color: '#10b981' }} strokeWidth={2.5} />
-            : <span style={{ fontSize: iconSize, lineHeight: 1, color: isActive ? theme.color : '#2d3a4a', transition: 'color 0.4s ease', userSelect: 'none' }}>
+            ? <Check size={checkSize} style={{ color: '#00dfc1' }} strokeWidth={2.5} />
+            : <span style={{
+                fontSize: iconSize, lineHeight: 1,
+                color: isActive ? theme.color : '#434656',
+                transition: 'color 0.4s ease',
+                userSelect: 'none',
+              }}>
                 {agent.icon}
               </span>
           }
@@ -130,14 +139,19 @@ function AgentNode({ agent, state, isMobile, hideTooltip }) {
       </div>
 
       {/* Label */}
-      <div className="mt-1.5 text-center" style={{ opacity: isIdle ? 0.35 : 1, transition: 'opacity 0.4s ease' }}>
-        <p className={`font-extrabold uppercase leading-none ${isMobile ? 'text-[7px] tracking-[0.18em]' : 'text-[8px] tracking-[0.22em]'}`}
-           style={{ color: isApproved ? '#10b981' : isActive ? theme.color : '#3a4255' }}>
+      <div className="mt-1.5 text-center" style={{ opacity: isIdle ? 0.30 : 1, transition: 'opacity 0.4s ease' }}>
+        <p
+          className={`font-extrabold uppercase leading-none ${isMobile ? 'text-[7px] tracking-[0.18em]' : 'text-[8px] tracking-[0.22em]'}`}
+          style={{
+            color: isApproved ? '#00dfc1' : isActive ? theme.color : '#434656',
+            fontFamily: 'JetBrains Mono, monospace',
+          }}
+        >
           {agent.role}
         </p>
         {!isMobile && (
           <p className="text-[10px] mt-0.5 leading-none"
-             style={{ color: isActive || isApproved ? '#7a8299' : '#3a4255' }}>
+             style={{ color: isActive || isApproved ? '#8e90a2' : '#434656' }}>
             {agent.name.split(' ').slice(0, 2).join(' ')}
           </p>
         )}
@@ -151,13 +165,14 @@ function Connector({ fromApproved, fromRunning, fromColor, fromGlow }) {
   const lit = fromApproved || fromRunning
   return (
     <div className="relative flex-1 mx-2" style={{ height: 2, marginBottom: 28 }}>
-      <div className="absolute inset-0 rounded-full" style={{ background: lit ? `${fromGlow}0.3)` : '#1e2530' }} />
+      <div className="absolute inset-0 rounded-full"
+           style={{ background: lit ? `${fromGlow}0.28)` : '#242842' }} />
       {lit && (
         <div
           className="pipeline-particle"
           style={{
-            background: `linear-gradient(90deg, transparent, ${fromApproved ? '#10b981' : fromColor}, transparent)`,
-            boxShadow: `0 0 8px ${fromApproved ? '#10b981' : fromColor}`,
+            background: `linear-gradient(90deg, transparent, ${fromApproved ? '#00dfc1' : fromColor}, transparent)`,
+            boxShadow: `0 0 8px ${fromApproved ? '#00dfc1' : fromColor}`,
           }}
         />
       )}
@@ -172,18 +187,20 @@ function FinalNode({ complete, small }) {
     <div className="flex flex-col items-center flex-shrink-0">
       <div style={{
         width: sz, height: sz, borderRadius: '50%',
-        background: complete ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.02)',
-        border: `1.5px solid ${complete ? '#f59e0b' : '#1e2530'}`,
-        boxShadow: complete ? '0 0 24px rgba(245,158,11,0.25)' : 'none',
+        background: complete ? 'rgba(245,158,11,0.12)' : 'rgba(184,195,255,0.03)',
+        border: `1.5px solid ${complete ? '#f59e0b' : '#242842'}`,
+        boxShadow: complete ? '0 0 24px rgba(245,158,11,0.22)' : 'none',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        opacity: complete ? 1 : 0.28,
+        opacity: complete ? 1 : 0.25,
         transition: 'all 0.5s ease',
       }}>
-        <span style={{ fontSize: small ? 18 : 24, color: complete ? '#f59e0b' : '#2d3a4a', lineHeight: 1 }}>★</span>
+        <span style={{ fontSize: small ? 18 : 24, color: complete ? '#f59e0b' : '#434656', lineHeight: 1 }}>★</span>
       </div>
-      <div className="mt-1.5 text-center" style={{ opacity: complete ? 1 : 0.28, transition: 'opacity 0.5s' }}>
+      <div className="mt-1.5 text-center" style={{ opacity: complete ? 1 : 0.25, transition: 'opacity 0.5s' }}>
         <p className="text-[8px] font-extrabold uppercase tracking-[0.22em] leading-none"
-           style={{ color: complete ? '#f59e0b' : '#3a4255' }}>FIN</p>
+           style={{ color: complete ? '#f59e0b' : '#434656', fontFamily: 'JetBrains Mono, monospace' }}>
+          FIN
+        </p>
       </div>
     </div>
   )
@@ -192,7 +209,7 @@ function FinalNode({ complete, small }) {
 /* ── Pipeline ─────────────────────────────────────────── */
 export default function PipelineProgress({ agentStates, campaignComplete, isMobile }) {
 
-  /* ── Mobile: 2x2 grid ── */
+  /* ── Mobile: 2×2 grid ── */
   if (isMobile) {
     return (
       <div style={{ width: '100%', padding: '4px 8px' }}>

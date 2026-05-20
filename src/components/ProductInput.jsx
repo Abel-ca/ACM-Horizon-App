@@ -49,19 +49,19 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
   return (
     <div style={{ opacity: disabled ? 0.35 : 1, pointerEvents: disabled ? 'none' : 'auto', transition: 'opacity 0.4s' }}>
 
-      <p className="hero-d1 text-[9px] font-black uppercase tracking-[0.4em] mb-5"
-         style={{ color: 'rgba(99,102,241,0.6)' }}>
+      <p className="hero-d1 text-[9px] font-bold uppercase tracking-[0.4em] mb-5"
+         style={{ color: 'rgba(184,195,255,0.55)', fontFamily: 'JetBrains Mono, monospace' }}>
         — Centro de Comando
       </p>
 
       <h1
-        className="hero-d2 font-black leading-[1.06] mb-3 text-gradient-hero"
-        style={{ fontSize: 'clamp(36px, 5.5vw, 56px)', letterSpacing: '-0.03em' }}
+        className="hero-d2 font-display font-bold leading-[1.06] mb-3 text-gradient-hero"
+        style={{ fontSize: 'clamp(34px, 5.5vw, 54px)', letterSpacing: '-0.02em' }}
       >
         ¿Qué producto querés<br />validar hoy?
       </h1>
 
-      <p className="hero-d3 text-sm mb-8" style={{ color: '#4a5270', lineHeight: 1.75, maxWidth: 460 }}>
+      <p className="hero-d3 text-sm mb-8" style={{ color: '#8e90a2', lineHeight: 1.75, maxWidth: 460 }}>
         El Director de Marketing analiza la viabilidad y coordina a los 3 agentes en secuencia automática.
       </p>
 
@@ -69,10 +69,12 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
       <div
         className="hero-d4 flex gap-2 rounded-2xl p-1.5 transition-all duration-300"
         style={{
-          background: 'rgba(255,255,255,0.04)',
+          background: 'rgba(22,26,51,0.65)',
           backdropFilter: 'blur(12px)',
-          border: `1px solid ${focused ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.08)'}`,
-          boxShadow: focused ? '0 0 0 3px rgba(99,102,241,0.08), 0 8px 40px rgba(0,0,0,0.5)' : '0 4px 24px rgba(0,0,0,0.4)',
+          border: `1px solid ${focused ? 'rgba(46,91,255,0.50)' : 'rgba(184,195,255,0.10)'}`,
+          boxShadow: focused
+            ? '0 0 0 3px rgba(46,91,255,0.10), 0 8px 40px rgba(8,12,37,0.6)'
+            : '0 4px 24px rgba(8,12,37,0.5)',
         }}
       >
         <input
@@ -84,7 +86,7 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
           onBlur={() => setFocused(false)}
           placeholder={ph || 'Escribe un producto…'}
           className={`flex-1 bg-transparent px-4 py-3.5 text-[15px] font-medium outline-none${!product ? ' typing-cursor' : ''}`}
-          style={{ color: '#f0f4ff', caretColor: '#6366f1' }}
+          style={{ color: '#dee0ff', caretColor: '#2e5bff' }}
           disabled={disabled}
         />
         <button
@@ -93,13 +95,22 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
           className="flex items-center gap-2 rounded-xl text-[12px] font-bold uppercase tracking-widest transition-all duration-200 flex-shrink-0"
           style={{
             padding: '12px 26px',
-            background: canLaunch ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'rgba(255,255,255,0.06)',
-            color: canLaunch ? '#fff' : 'rgba(255,255,255,0.25)',
-            boxShadow: canLaunch ? '0 4px 20px rgba(99,102,241,0.35)' : 'none',
+            fontFamily: 'JetBrains Mono, monospace',
+            background: canLaunch ? 'linear-gradient(135deg, #2e5bff, #1a44e8)' : 'rgba(184,195,255,0.06)',
+            color: canLaunch ? '#efefff' : 'rgba(184,195,255,0.25)',
+            boxShadow: canLaunch ? '0 4px 20px rgba(46,91,255,0.40)' : 'none',
             cursor: canLaunch ? 'pointer' : 'not-allowed',
           }}
-          onMouseEnter={e => { if (canLaunch) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(99,102,241,0.45)' } }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = canLaunch ? '0 4px 20px rgba(99,102,241,0.35)' : 'none' }}
+          onMouseEnter={e => {
+            if (canLaunch) {
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0,242,209,0.20), 0 8px 28px rgba(46,91,255,0.55)'
+            }
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = 'none'
+            e.currentTarget.style.boxShadow = canLaunch ? '0 4px 20px rgba(46,91,255,0.40)' : 'none'
+          }}
         >
           <Rocket size={14} strokeWidth={2.5} />
           Lanzar
@@ -109,7 +120,8 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
       {/* Example chips */}
       {!disabled && (
         <div className="hero-d5 flex flex-wrap items-center gap-2 mt-4">
-          <span className="text-[9px] uppercase tracking-[0.22em]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+          <span className="text-[9px] uppercase tracking-[0.22em]"
+                style={{ color: 'rgba(184,195,255,0.22)', fontFamily: 'JetBrains Mono, monospace' }}>
             Probar con:
           </span>
           {EXAMPLES.map(ex => (
@@ -117,9 +129,21 @@ export default function ProductInput({ product, setProduct, onStart, disabled })
               key={ex}
               onClick={() => setProduct(ex)}
               className="text-[11px] px-3 py-1 rounded-full transition-all duration-150"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.32)' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.color = '#a5b4fc'; e.currentTarget.style.background = 'rgba(99,102,241,0.07)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.32)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
+              style={{
+                background: 'rgba(22,26,51,0.6)',
+                border: '1px solid rgba(184,195,255,0.10)',
+                color: 'rgba(184,195,255,0.35)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'rgba(46,91,255,0.45)'
+                e.currentTarget.style.color = '#b8c3ff'
+                e.currentTarget.style.background = 'rgba(46,91,255,0.10)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'rgba(184,195,255,0.10)'
+                e.currentTarget.style.color = 'rgba(184,195,255,0.35)'
+                e.currentTarget.style.background = 'rgba(22,26,51,0.6)'
+              }}
             >
               {ex}
             </button>
